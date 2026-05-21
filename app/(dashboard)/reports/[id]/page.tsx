@@ -48,6 +48,13 @@ export default async function ReportDetailPage({ params }: PageProps) {
           <Download size={14} />
           PDF
         </a>
+        <a
+          href={`/api/reports/${id}/download?format=ppt`}
+          className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium px-4 py-2 rounded-lg text-sm transition-colors"
+        >
+          <Download size={14} />
+          PPT
+        </a>
       </div>
 
       {content ? (

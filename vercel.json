@@ -1,0 +1,8 @@
+{
+  "crons": [
+    { "path": "/api/cron/update-stats",         "schedule": "0 3 * * *" },
+    { "path": "/api/cron/eq-analysis",           "schedule": "0 4 * * *" },
+    { "path": "/api/cron/market-intelligence",   "schedule": "0 6 * * *" },
+    { "path": "/api/cron/calculate-percentiles", "schedule": "0 5 * * *" }
+  ]
+}

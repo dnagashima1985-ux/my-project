@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Bookmark, FileText } from 'lucide-react';
+import PercentileGrid from '@/components/players/PercentileGrid';
+import type { LeaguePercentile } from '@/types';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -28,6 +30,7 @@ export default async function PlayerDetailPage({ params }: PageProps) {
   const profile = player.player_style_profiles?.[0];
   const injury = player.player_injuries?.[0];
   const eq = player.eq_analyses?.[0];
+  const percentiles = (player.league_percentiles ?? []) as LeaguePercentile[];
   const stats = player.stats ?? {};
 
   return (
@@ -95,6 +98,12 @@ export default async function PlayerDetailPage({ params }: PageProps) {
             {stats.appearances} appearances · {stats.minutes_played} minutes
           </p>
         )}
+      </div>
+
+      {/* Percentiles */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+        <h2 className="font-semibold text-white mb-4">League percentiles</h2>
+        <PercentileGrid percentiles={percentiles} stats={stats} />
       </div>
 
       {/* Style profile */}
