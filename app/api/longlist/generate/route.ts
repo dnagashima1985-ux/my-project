@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generateLonglist } from '@/lib/claude/client';
+import { sendTrialLowEmail } from '@/lib/email/client';
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
@@ -106,12 +107,17 @@ export async function POST(req: NextRequest) {
     .select()
     .single();
 
-  // Decrement trial uses
+  // Decrement trial uses + send low-use email
   if (profile.plan === 'trial') {
+    const newRemaining = profile.trial_uses_remaining - 1;
     await supabase
       .from('users')
-      .update({ trial_uses_remaining: profile.trial_uses_remaining - 1 })
+      .update({ trial_uses_remaining: newRemaining })
       .eq('id', user.id);
+
+    if (newRemaining <= 2 && user.email) {
+      sendTrialLowEmail(user.email, newRemaining).catch(() => {});
+    }
   }
 
   return NextResponse.json({ id: longlist!.id });

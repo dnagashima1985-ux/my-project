@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Bookmark, FileText } from 'lucide-react';
 import PercentileGrid from '@/components/players/PercentileGrid';
+import TriggerEQButton from '@/components/players/TriggerEQButton';
 import type { LeaguePercentile } from '@/types';
 
 interface PageProps {
@@ -234,8 +235,12 @@ export default async function PlayerDetailPage({ params }: PageProps) {
           </p>
         </div>
       ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 text-center text-gray-600">
-          <p className="text-sm">EQ analysis not yet available for this player</p>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-white">EQ Analysis</h2>
+            <TriggerEQButton playerId={player.id} />
+          </div>
+          <p className="text-sm text-gray-600">No EQ analysis yet. Click &ldquo;Run EQ analysis&rdquo; to generate one.</p>
         </div>
       )}
     </div>

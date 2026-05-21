@@ -51,6 +51,33 @@ export async function POST(req: NextRequest) {
     }, { onConflict: 'stripe_subscription_id' });
   }
 
+  if (event.type === 'customer.subscription.updated') {
+    const subscription = event.data.object as Stripe.Subscription;
+    const priceId = subscription.items.data[0]?.price.id;
+    const plan = PLAN_BY_PRICE[priceId];
+    if (!plan) return NextResponse.json({ ok: true });
+
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('user_id')
+      .eq('stripe_subscription_id', subscription.id)
+      .single();
+
+    if (sub?.user_id) {
+      await supabase.from('users').update({ plan }).eq('id', sub.user_id);
+      await supabase
+        .from('subscriptions')
+        .update({
+          plan,
+          status: subscription.status,
+          current_period_end: new Date(
+            (subscription as unknown as { current_period_end: number }).current_period_end * 1000
+          ).toISOString(),
+        })
+        .eq('stripe_subscription_id', subscription.id);
+    }
+  }
+
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription;
     // Downgrade to trial on cancellation
