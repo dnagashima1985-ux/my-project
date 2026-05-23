@@ -30,16 +30,15 @@ export default function LandingPage() {
         </div>
 
         <h1 className="text-5xl md:text-6xl font-black mb-6 leading-tight">
-          The only scouting tool built for{' '}
-          <span className="text-emerald-400">professional scouts</span>
-          <br />— not bettors, not clubs
+          AI-powered scouting intelligence
+          <br />for{' '}
+          <span className="text-emerald-400">football professionals</span>
         </h1>
 
         <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-          ScoutIQ reduces longlist creation from{' '}
-          <span className="text-white font-semibold">8–15 hours</span> to{' '}
-          <span className="text-emerald-400 font-semibold">1–2 hours</span>.
-          AI-powered. Position × play style dual-axis evaluation. League-relative percentiles.
+          From first look to final report —{' '}
+          <span className="text-white font-semibold">ScoutIQ</span> combines AI analysis with real match data.
+          Position × play style dual-axis evaluation. League-relative percentiles.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
