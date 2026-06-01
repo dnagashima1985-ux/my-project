@@ -19,7 +19,7 @@ import contextily as ctx
 import os
 
 LOGOS_DIR = "/home/user/my-project/logos"
-OUT_FILE  = "/home/user/my-project/scout_map_v5.png"
+OUT_FILE  = "/home/user/my-project/scout_map_v6.png"
 DPI  = 160
 FW, FH = 22.0, 12.375   # 16:9 inches
 
@@ -187,26 +187,23 @@ ax.axis('off')
 print("Downloading map tiles…")
 try:
     tile_img, tile_ext = ctx.bounds2img(
-        xmin, ymin, xmax, ymax,
-        zoom=5,
-        source=ctx.providers.Esri.NatGeoWorldMap,
-        ll=False   # extents already in Web Mercator
+        xmin, ymin, xmax, ymax, zoom=5,
+        source=ctx.providers.Esri.WorldPhysical,
+        ll=False
     )
-    ax.imshow(tile_img, extent=tile_ext, origin='upper',
+    # Brighten the ocean (blue channel boost) for a softer, more vivid look
+    from PIL import Image as _PIL
+    pil = _PIL.fromarray(tile_img[..., :3])
+    import PIL.ImageEnhance as _IE
+    pil = _IE.Color(pil).enhance(1.35)   # more saturation
+    pil = _IE.Brightness(pil).enhance(1.08)
+    tile_img_adj = np.array(pil)
+    ax.imshow(tile_img_adj, extent=tile_ext, origin='upper',
               aspect='auto', zorder=0)
-    print("NatGeo tiles OK")
+    print("WorldPhysical tiles OK")
 except Exception as e:
-    print(f"NatGeo failed ({e}), trying Stadia terrain…")
-    try:
-        tile_img, tile_ext = ctx.bounds2img(
-            xmin, ymin, xmax, ymax, zoom=5,
-            source=ctx.providers.Stadia.StamenTerrain, ll=False)
-        ax.imshow(tile_img, extent=tile_ext, origin='upper',
-                  aspect='auto', zorder=0)
-        print("Stadia terrain OK")
-    except Exception as e2:
-        print(f"Stadia also failed ({e2}), plain bg")
-        ax.set_facecolor('#4FAAD5')
+    print(f"Tile failed ({e}), plain bg")
+    ax.set_facecolor('#4FAAD5')
 
 # ── Web Mercator helpers ──────────────────────────────────────────────────────
 # Figure pixels from Web Mercator coords
@@ -238,8 +235,8 @@ for r,a in [(500000,0.07),(300000,0.15),(160000,0.26),(75000,0.42)]:
 fig.canvas.draw()
 inv = ax.transData.inverted()
 
-LOGO_PX = 75
-STVV_PX = 165
+LOGO_PX = 62
+STVV_PX = 152
 
 entries = []
 for abbr, lat, lon in CLUBS:
