@@ -19,7 +19,7 @@ import contextily as ctx
 import os
 
 LOGOS_DIR = "/home/user/my-project/logos"
-OUT_FILE  = "/home/user/my-project/scout_map_v9.png"
+OUT_FILE  = "/home/user/my-project/scout_map_final.png"
 DPI  = 160
 FW, FH = 22.0, 12.375   # 16:9 inches
 
@@ -235,8 +235,8 @@ for r,a in [(500000,0.07),(300000,0.15),(160000,0.26),(75000,0.42)]:
 fig.canvas.draw()
 inv = ax.transData.inverted()
 
-LOGO_PX = 72
-STVV_PX = 155
+LOGO_PX = 46      # small enough that 79 clubs fit without overlap
+STVV_PX = 142
 
 entries = []
 for abbr, lat, lon in CLUBS:
@@ -248,66 +248,77 @@ stvv_entry = next(e for e in entries if e[4]=="STVV")
 stvv_px_x, stvv_px_y = stvv_entry[0], stvv_entry[1]
 others = [e for e in entries if e[4]!="STVV"]
 
-# ── Polar layout: preserve bearing angle from STVV, spread radially ───────────
+# ── Non-overlap force-directed layout ─────────────────────────────────────────
+# Keep true bearing from STVV, spring-pull to origin, strong pair repulsion.
+orig_px = [(e[0], e[1]) for e in others]   # geographic display positions
+
+# Polar coords from STVV for each club
 orig_angles = []
 orig_radii  = []
-for e in others:
-    dx = e[0] - stvv_px_x
-    dy = e[1] - stvv_px_y
+for ox, oy in orig_px:
+    dx, dy = ox - stvv_px_x, oy - stvv_px_y
     orig_angles.append(np.arctan2(dy, dx))
-    orig_radii.append(max(80.0, (dx*dx+dy*dy)**0.5))
+    orig_radii.append(max(90.0, (dx*dx+dy*dy)**0.5))
 
-need       = LOGO_PX + 4
-MIN_R      = STVV_PX * 0.60       # don't enter STVV badge zone
-MAX_ANGLE  = np.radians(50)       # max angular drift from true bearing
-MAX_R_ADD  = 480                   # max extra radius allowed
+NEED    = LOGO_PX + 4          # min centre-to-centre gap
+MIN_R   = STVV_PX * 0.55      # clear of STVV
+HALF    = FW * DPI / 2        # rough centre in px
+MARGIN  = LOGO_PX // 2 + 2
+PX_MIN  = MARGIN
+PX_MAX  = FW * DPI - MARGIN
+PY_MIN  = MARGIN
+PY_MAX  = FH * DPI - MARGIN
 
-for _ in range(5000):
-    moved = False
+def no_overlap(cx, cy, placed_list):
+    if not (PX_MIN <= cx <= PX_MAX and PY_MIN <= cy <= PY_MAX):
+        return False
+    if (cx-stvv_px_x)**2 + (cy-stvv_px_y)**2 < MIN_R**2:
+        return False
+    for px2, py2 in placed_list:
+        if (cx-px2)**2 + (cy-py2)**2 < NEED**2:
+            return False
+    return True
 
-    # — pair repulsion --------------------------------------------------------
-    for i in range(len(others)):
-        for j in range(i+1, len(others)):
-            dx = others[i][0] - others[j][0]
-            dy = others[i][1] - others[j][1]
-            d  = (dx*dx+dy*dy)**0.5
-            if d < need and d > 0.1:
-                push = (need - d) / 2.1
-                nx, ny = dx/d, dy/d
-                others[i][0] += nx*push; others[i][1] += ny*push
-                others[j][0] -= nx*push; others[j][1] -= ny*push
-                moved = True
+# Greedy placement: sort by distance from STVV descending
+# (peripheral clubs get placed at geography first; central clusters adapt)
+others_sorted = sorted(
+    others,
+    key=lambda e: -(  (e[0]-stvv_px_x)**2 + (e[1]-stvv_px_y)**2  )**0.5
+)
 
-    # — STVV centre repulsion -------------------------------------------------
-    for e in others:
-        dx = e[0] - stvv_px_x
-        dy = e[1] - stvv_px_y
-        d  = (dx*dx+dy*dy)**0.5
-        if d < MIN_R and d > 0.1:
-            push = (MIN_R - d)
-            e[0] += (dx/d)*push; e[1] += (dy/d)*push
+placed_positions = []   # (cx, cy) already committed
 
-    # — polar constraint: keep bearing ± MAX_ANGLE, radius in allowed range ---
-    for i, e in enumerate(others):
-        dx = e[0] - stvv_px_x
-        dy = e[1] - stvv_px_y
-        cur_r   = max(1.0, (dx*dx+dy*dy)**0.5)
-        cur_ang = np.arctan2(dy, dx)
+for e in others_sorted:
+    ox, oy = e[0], e[1]
+    # Bearing from STVV for directional bias
+    bdx, bdy = ox - stvv_px_x, oy - stvv_px_y
+    bearing   = np.arctan2(bdy, bdx)
 
-        # Clamp angle
-        diff = cur_ang - orig_angles[i]
-        diff = (diff + np.pi) % (2*np.pi) - np.pi   # normalise to [-π, π]
-        if abs(diff) > MAX_ANGLE:
-            cur_ang = orig_angles[i] + np.sign(diff)*MAX_ANGLE
+    found = False
+    # Try increasing distances from geographic position
+    for dist in range(0, 700, 3):
+        # Sweep angles around bearing, prioritising straight-out direction
+        angle_offsets = [0]
+        step_deg = 10
+        for k in range(1, int(360 / step_deg)):
+            angle_offsets += [k*step_deg, -k*step_deg]
+        for a_off in angle_offsets:
+            a   = bearing + np.radians(a_off)
+            cx  = ox + dist * np.cos(a)
+            cy  = oy + dist * np.sin(a)
+            if no_overlap(cx, cy, placed_positions):
+                e[0], e[1] = cx, cy
+                placed_positions.append((cx, cy))
+                found = True
+                break
+        if found:
+            break
+    if not found:
+        placed_positions.append((ox, oy))   # fallback
 
-        # Clamp radius
-        cur_r = np.clip(cur_r, MIN_R, orig_radii[i] + MAX_R_ADD)
-
-        e[0] = stvv_px_x + cur_r*np.cos(cur_ang)
-        e[1] = stvv_px_y + cur_r*np.sin(cur_ang)
-
-    if not moved:
-        break
+print(f"Greedy placement done. Remaining overlaps: "
+      + str(sum(1 for i in range(len(others)) for j in range(i+1,len(others))
+                if ((others[i][0]-others[j][0])**2+(others[i][1]-others[j][1])**2)**0.5 < NEED)))
 
 # Convert resolved display positions back to Web Mercator
 for e in others:
