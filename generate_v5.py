@@ -19,7 +19,7 @@ import contextily as ctx
 import os
 
 LOGOS_DIR = "/home/user/my-project/logos"
-OUT_FILE  = "/home/user/my-project/scout_map_v6.png"
+OUT_FILE  = "/home/user/my-project/scout_map_v9.png"
 DPI  = 160
 FW, FH = 22.0, 12.375   # 16:9 inches
 
@@ -235,8 +235,8 @@ for r,a in [(500000,0.07),(300000,0.15),(160000,0.26),(75000,0.42)]:
 fig.canvas.draw()
 inv = ax.transData.inverted()
 
-LOGO_PX = 62
-STVV_PX = 152
+LOGO_PX = 72
+STVV_PX = 155
 
 entries = []
 for abbr, lat, lon in CLUBS:
@@ -248,32 +248,64 @@ stvv_entry = next(e for e in entries if e[4]=="STVV")
 stvv_px_x, stvv_px_y = stvv_entry[0], stvv_entry[1]
 others = [e for e in entries if e[4]!="STVV"]
 
-# ── Overlap resolution ────────────────────────────────────────────────────────
-origins = [(e[0],e[1]) for e in others]
-need = LOGO_PX + 7
+# ── Polar layout: preserve bearing angle from STVV, spread radially ───────────
+orig_angles = []
+orig_radii  = []
+for e in others:
+    dx = e[0] - stvv_px_x
+    dy = e[1] - stvv_px_y
+    orig_angles.append(np.arctan2(dy, dx))
+    orig_radii.append(max(80.0, (dx*dx+dy*dy)**0.5))
 
-for iteration in range(3000):
+need       = LOGO_PX + 4
+MIN_R      = STVV_PX * 0.60       # don't enter STVV badge zone
+MAX_ANGLE  = np.radians(50)       # max angular drift from true bearing
+MAX_R_ADD  = 480                   # max extra radius allowed
+
+for _ in range(5000):
     moved = False
+
+    # — pair repulsion --------------------------------------------------------
     for i in range(len(others)):
         for j in range(i+1, len(others)):
             dx = others[i][0] - others[j][0]
             dy = others[i][1] - others[j][1]
             d  = (dx*dx+dy*dy)**0.5
             if d < need and d > 0.1:
-                push = (need-d) / 2.05
+                push = (need - d) / 2.1
                 nx, ny = dx/d, dy/d
-                others[i][0] += nx*push;  others[i][1] += ny*push
-                others[j][0] -= nx*push;  others[j][1] -= ny*push
+                others[i][0] += nx*push; others[i][1] += ny*push
+                others[j][0] -= nx*push; others[j][1] -= ny*push
                 moved = True
-    # Clamp drift from origin
-    for i,e in enumerate(others):
-        ox,oy = origins[i]
-        ddx,ddy = e[0]-ox, e[1]-oy
-        drift = (ddx*ddx+ddy*ddy)**0.5
-        MAX_DRIFT = 260
-        if drift > MAX_DRIFT:
-            s = MAX_DRIFT/drift
-            e[0] = ox+ddx*s; e[1] = oy+ddy*s
+
+    # — STVV centre repulsion -------------------------------------------------
+    for e in others:
+        dx = e[0] - stvv_px_x
+        dy = e[1] - stvv_px_y
+        d  = (dx*dx+dy*dy)**0.5
+        if d < MIN_R and d > 0.1:
+            push = (MIN_R - d)
+            e[0] += (dx/d)*push; e[1] += (dy/d)*push
+
+    # — polar constraint: keep bearing ± MAX_ANGLE, radius in allowed range ---
+    for i, e in enumerate(others):
+        dx = e[0] - stvv_px_x
+        dy = e[1] - stvv_px_y
+        cur_r   = max(1.0, (dx*dx+dy*dy)**0.5)
+        cur_ang = np.arctan2(dy, dx)
+
+        # Clamp angle
+        diff = cur_ang - orig_angles[i]
+        diff = (diff + np.pi) % (2*np.pi) - np.pi   # normalise to [-π, π]
+        if abs(diff) > MAX_ANGLE:
+            cur_ang = orig_angles[i] + np.sign(diff)*MAX_ANGLE
+
+        # Clamp radius
+        cur_r = np.clip(cur_r, MIN_R, orig_radii[i] + MAX_R_ADD)
+
+        e[0] = stvv_px_x + cur_r*np.cos(cur_ang)
+        e[1] = stvv_px_y + cur_r*np.sin(cur_ang)
+
     if not moved:
         break
 
