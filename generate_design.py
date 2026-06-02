@@ -19,7 +19,7 @@ import contextily as ctx
 import os
 
 LOGOS_DIR = "/home/user/my-project/logos"
-OUT_FILE  = "/home/user/my-project/scout_map_design.png"
+OUT_FILE  = "/home/user/my-project/scout_map_clean.png"
 DPI  = 160
 FW, FH = 22.0, 12.375
 
@@ -99,57 +99,25 @@ COLORS = {
     "FKP":"#002D62","CZV":"#CC0000","FCK2":"#0B479D",
 }
 
-# ── Logo loader with white-border framing ─────────────────────────────────────
-def load_logo(abbr, inner_px, border=5):
-    """Load logo, paste onto white circle with drop-shadow. Returns RGBA array."""
+# ── Logo loader — raw logo only, no border ────────────────────────────────────
+def load_logo(abbr, px):
+    """Return raw logo resized to px. Returns RGBA array or None."""
     path = os.path.join(LOGOS_DIR, f"{abbr}.png")
-    ok = os.path.exists(path) and os.path.getsize(path) > 500
-    total_px = inner_px + border * 2 + 4   # total badge size
-
-    # Background circle (white disc)
-    bg = Image.new("RGBA", (total_px, total_px), (0,0,0,0))
-    draw = ImageDraw.Draw(bg)
-    draw.ellipse([0,0,total_px-1,total_px-1], fill=(255,255,255,230))
-
-    if ok:
-        try:
-            img = Image.open(path).convert("RGBA")
-            w,h = img.size
-            if max(w,h)/min(w,h) > 2.2: raise ValueError("panoramic")
-            arr0 = np.array(img)
-            if (arr0[...,3] < 200).mean() < 0.08: raise ValueError("photo")
-            # Resize to fit inner circle
-            s = inner_px / max(w,h)
-            img = img.resize((max(1,int(w*s)), max(1,int(h*s))), Image.LANCZOS)
-            # Centre-paste onto white circle
-            pw, ph = img.size
-            ox = (total_px - pw)//2
-            oy = (total_px - ph)//2
-            bg.paste(img, (ox, oy), img)
-        except Exception:
-            ok = False
-
-    if not ok:
-        # Coloured fallback circle with abbreviation
-        c = COLORS.get(abbr, "#888888")
-        r,g,b = int(c[1:3],16),int(c[3:5],16),int(c[5:7],16)
-        draw.ellipse([border,border,total_px-border-1,total_px-border-1],
-                     fill=(r,g,b,230))
-
-    # Thin dark border ring
-    draw.ellipse([1,1,total_px-2,total_px-2],
-                 outline=(80,80,80,160), width=1)
-
-    # Drop shadow (blurred dark copy below-right)
-    shadow = Image.new("RGBA", (total_px+6, total_px+6), (0,0,0,0))
-    sh_draw = ImageDraw.Draw(shadow)
-    sh_draw.ellipse([3,3,total_px+2,total_px+2], fill=(0,0,0,70))
-    shadow = shadow.filter(ImageFilter.GaussianBlur(3))
-
-    canvas = Image.new("RGBA", (total_px+6, total_px+6), (0,0,0,0))
-    canvas.paste(shadow, (0,0), shadow)
-    canvas.paste(bg, (0,0), bg)
-    return np.array(canvas)
+    if not os.path.exists(path) or os.path.getsize(path) < 500:
+        return None
+    try:
+        img = Image.open(path).convert("RGBA")
+        w, h = img.size
+        if max(w,h)/min(w,h) > 2.2:
+            return None
+        arr0 = np.array(img)
+        if (arr0[...,3] < 200).mean() < 0.08:
+            return None
+        s = px / max(w, h)
+        img = img.resize((max(1,int(w*s)), max(1,int(h*s))), Image.LANCZOS)
+        return np.array(img)
+    except Exception:
+        return None
 
 # ── Figure ────────────────────────────────────────────────────────────────────
 fig, ax = plt.subplots(figsize=(FW, FH), dpi=DPI)
@@ -189,10 +157,9 @@ for r,a in [(600000,0.06),(380000,0.13),(220000,0.24),(110000,0.40),(50000,0.55)
 fig.canvas.draw()
 inv = ax.transData.inverted()
 
-LOGO_PX  = 46
-STVV_PX  = 148
-BORDER   = 6
-NEED     = LOGO_PX + BORDER*2 + 8   # clear gap between badge outer edges
+LOGO_PX  = 52    # raw logo size in display pixels
+STVV_PX  = 155
+NEED     = LOGO_PX + 6              # centre-to-centre separation
 
 entries = []
 for abbr,lat,lon in CLUBS:
@@ -205,8 +172,7 @@ stvv_px_x, stvv_px_y = stvv_e[0], stvv_e[1]
 others = [e for e in entries if e[4]!="STVV"]
 
 # ── Greedy no-overlap placement ───────────────────────────────────────────────
-HALF_B = (LOGO_PX + BORDER*2 + 4) // 2
-MARGIN = HALF_B + 4
+MARGIN = LOGO_PX // 2 + 4
 PX_MIN, PX_MAX = MARGIN, FW*DPI - MARGIN
 PY_MIN, PY_MAX = MARGIN, FH*DPI - MARGIN
 MIN_STVV = STVV_PX * 0.60
@@ -266,19 +232,26 @@ for abbr,lat,lon in CLUBS:
     ax.add_patch(Circle((cwx,cwy),8000,color='white',zorder=7))
 
 # ── Place logos ───────────────────────────────────────────────────────────────
-def place(abbr, wx, wy, inner_px, z=8):
-    arr = load_logo(abbr, inner_px, border=BORDER)
-    ab = AnnotationBbox(
+def place(abbr, wx, wy, px, z=8):
+    arr = load_logo(abbr, px)
+    if arr is None:
+        # tiny fallback dot — won't show much
+        c = COLORS.get(abbr, "#888888")
+        r,g,b = int(c[1:3],16),int(c[3:5],16),int(c[5:7],16)
+        arr_img = Image.new("RGBA",(px,px),(0,0,0,0))
+        ImageDraw.Draw(arr_img).ellipse([0,0,px-1,px-1],fill=(r,g,b,200))
+        arr = np.array(arr_img)
+    ax.add_artist(AnnotationBbox(
         OffsetImage(arr, zoom=1.0, interpolation='lanczos'),
         (wx, wy), frameon=False, zorder=z, xycoords='data',
-        box_alignment=(0.5, 0.5))
-    ax.add_artist(ab)
+        box_alignment=(0.5, 0.5)))
 
 for e in others:
     place(e[4], e[2], e[3], LOGO_PX)
 
 # ── STVV centre ───────────────────────────────────────────────────────────────
 place("STVV", stvv_wx, stvv_wy, STVV_PX, z=14)
+
 
 # Gold pin above STVV
 PIN_OFF = 120000
@@ -294,7 +267,7 @@ ax.add_patch(MplPoly(tail,closed=True,facecolor='#FDB913',
                       edgecolor='#8B6914',lw=1.5,zorder=15))
 
 ax.annotate("STVV", xy=(stvv_wx,stvv_wy),
-            xytext=(0,-(STVV_PX//2+BORDER+18)), textcoords='offset pixels',
+            xytext=(0,-(STVV_PX//2+20)), textcoords='offset pixels',
             ha='center', va='top', fontsize=13, fontweight='bold',
             color='white', annotation_clip=False, zorder=17,
             path_effects=[pe.withStroke(linewidth=4,foreground='#1a1a1a')])
