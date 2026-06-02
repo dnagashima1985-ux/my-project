@@ -19,7 +19,7 @@ import contextily as ctx
 import os
 
 LOGOS_DIR = "/home/user/my-project/logos"
-OUT_FILE  = "/home/user/my-project/scout_map_clean.png"
+OUT_FILE  = "/home/user/my-project/scout_map_clean2.png"
 DPI  = 160
 FW, FH = 22.0, 12.375
 
@@ -111,7 +111,8 @@ def load_logo(abbr, px):
         if max(w,h)/min(w,h) > 2.2:
             return None
         arr0 = np.array(img)
-        if (arr0[...,3] < 200).mean() < 0.08:
+        # only reject pure photos (no transparency at all AND large file)
+        if (arr0[...,3] < 200).mean() < 0.02 and os.path.getsize(path) > 80000:
             return None
         s = px / max(w, h)
         img = img.resize((max(1,int(w*s)), max(1,int(h*s))), Image.LANCZOS)
@@ -222,14 +223,17 @@ for abbr,lat,lon in CLUBS:
     ax.plot([stvv_wx,cwx],[stvv_wy,cwy],
             color='white',lw=0.6,alpha=0.45,zorder=5,solid_capstyle='round')
 
-# ── Glowing city dots ─────────────────────────────────────────────────────────
-for abbr,lat,lon in CLUBS:
-    if abbr=="STVV": continue
-    cwx,cwy = ll2web(lat,lon)
-    c = COLORS.get(abbr,"#AAAAAA")
-    for r,a in [(65000,0.18),(40000,0.40),(18000,0.80)]:
-        ax.add_patch(Circle((cwx,cwy),r,color=c,alpha=a,zorder=6))
-    ax.add_patch(Circle((cwx,cwy),8000,color='white',zorder=7))
+# ── City pin dots (small, only shown when logo is offset far from city) ────────
+for e in others:
+    abbr = e[4]
+    logo_wx, logo_wy = e[2], e[3]
+    city_wx, city_wy = ll2web(*next((lat,lon) for a,lat,lon in CLUBS if a==abbr))
+    dist_m = ((logo_wx-city_wx)**2 + (logo_wy-city_wy)**2)**0.5
+    # Only draw dot when logo was pushed far from its city (>50 km)
+    if dist_m > 50000:
+        ax.add_patch(Circle((city_wx,city_wy), 9000, color='white', zorder=7))
+        ax.add_patch(Circle((city_wx,city_wy), 6000,
+                             color=COLORS.get(abbr,"#AAAAAA"), zorder=8))
 
 # ── Place logos ───────────────────────────────────────────────────────────────
 def place(abbr, wx, wy, px, z=8):
