@@ -216,6 +216,53 @@ const DEMO_EQ = [
   { source_id: 'demo-006', total_score: 44, grade: 'MEDIUM', verdict: 'Some disciplinary concerns. Red card incident with disputed circumstances. Generally cooperative with media.' },
 ];
 
+const DEMO_PERCENTILES: Array<{
+  source_id: string;
+  league_id: string;
+  stats: Record<string, number>;
+}> = [
+  {
+    source_id: 'demo-001',
+    league_id: 'Allsvenskan',
+    stats: { goals: 72, assists: 84, xg: 68, xa: 79, pass_accuracy: 76, key_passes: 74, dribble_success_rate: 65, tackles: 58, interceptions: 55, aerial_duel_win_pct: 48 },
+  },
+  {
+    source_id: 'demo-002',
+    league_id: 'J1 League',
+    stats: { goals: 79, assists: 91, xg: 84, xa: 93, pass_accuracy: 65, key_passes: 91, dribble_success_rate: 82, tackles: 34, interceptions: 28, aerial_duel_win_pct: 31 },
+  },
+  {
+    source_id: 'demo-003',
+    league_id: 'Primeira Liga',
+    stats: { goals: 94, assists: 61, xg: 91, xa: 52, pass_accuracy: 48, key_passes: 44, dribble_success_rate: 58, tackles: 28, interceptions: 22, aerial_duel_win_pct: 74 },
+  },
+  {
+    source_id: 'demo-004',
+    league_id: 'Superligaen',
+    stats: { goals: 28, assists: 44, xg: 22, xa: 38, pass_accuracy: 92, key_passes: 35, dribble_success_rate: 61, tackles: 91, interceptions: 88, aerial_duel_win_pct: 79 },
+  },
+  {
+    source_id: 'demo-005',
+    league_id: 'Ligue 1',
+    stats: { goals: 71, assists: 84, xg: 72, xa: 87, pass_accuracy: 58, key_passes: 79, dribble_success_rate: 77, tackles: 44, interceptions: 38, aerial_duel_win_pct: 35 },
+  },
+  {
+    source_id: 'demo-006',
+    league_id: 'La Liga',
+    stats: { goals: 44, assists: 31, xg: 38, xa: 24, pass_accuracy: 84, key_passes: 22, dribble_success_rate: 42, tackles: 84, interceptions: 77, aerial_duel_win_pct: 88 },
+  },
+  {
+    source_id: 'demo-007',
+    league_id: 'J1 League',
+    stats: { goals: 51, assists: 42, xg: 47, xa: 36, pass_accuracy: 79, key_passes: 31, dribble_success_rate: 54, tackles: 77, interceptions: 68, aerial_duel_win_pct: 82 },
+  },
+  {
+    source_id: 'demo-008',
+    league_id: 'Allsvenskan',
+    stats: { goals: 48, assists: 75, xg: 44, xa: 82, pass_accuracy: 62, key_passes: 58, dribble_success_rate: 72, tackles: 65, interceptions: 61, aerial_duel_win_pct: 66 },
+  },
+];
+
 const DEMO_TRANSFER_SIGNALS = [
   {
     interested_club: 'FC Utrecht',
@@ -249,8 +296,9 @@ const DEMO_TRANSFER_SIGNALS = [
   },
 ];
 
-export async function seedDemo() {
+export async function seedDemo(): Promise<{ ok: boolean; errors: string[] }> {
   const supabase = getSupabase();
+  const errors: string[] = [];
   console.log('[seed] Starting demo data seed...');
 
   // Insert players
@@ -263,7 +311,12 @@ export async function seedDemo() {
       .select('id, source_id')
       .single();
 
-    if (error) { console.error('[seed] Player error:', error.message); continue; }
+    if (error) {
+      const msg = `Player ${p.name}: ${error.message}`;
+      console.error('[seed]', msg);
+      errors.push(msg);
+      continue;
+    }
     if (data) playerIdMap[data.source_id] = data.id;
     console.log(`[seed] Upserted player: ${p.name}`);
   }
@@ -273,7 +326,7 @@ export async function seedDemo() {
     const playerId = playerIdMap[inj.source_id];
     if (!playerId) continue;
 
-    await supabase.from('player_injuries').upsert({
+    const { error } = await supabase.from('player_injuries').upsert({
       player_id: playerId,
       status: inj.status,
       risk_score: inj.risk_score,
@@ -285,14 +338,22 @@ export async function seedDemo() {
       return_estimate: (inj as unknown as Record<string, string>).return_estimate ?? null,
       last_updated_at: new Date().toISOString(),
     }, { onConflict: 'player_id' });
+
+    if (error) {
+      const msg = `Injury ${inj.source_id}: ${error.message}`;
+      console.error('[seed]', msg);
+      errors.push(msg);
+    }
   }
 
-  // Insert EQ
+  // Insert EQ — delete first to avoid upsert constraint issues
   for (const eq of DEMO_EQ) {
     const playerId = playerIdMap[eq.source_id];
     if (!playerId) continue;
 
-    await supabase.from('eq_analyses').upsert({
+    await supabase.from('eq_analyses').delete().eq('player_id', playerId);
+
+    const { error } = await supabase.from('eq_analyses').insert({
       player_id: playerId,
       article_count: 8,
       total_score: eq.total_score,
@@ -306,10 +367,47 @@ export async function seedDemo() {
       },
       verdict: eq.verdict,
       analysed_at: new Date().toISOString(),
-    }, { onConflict: 'player_id' });
+    });
+
+    if (error) {
+      const msg = `EQ ${eq.source_id}: ${error.message}`;
+      console.error('[seed]', msg);
+      errors.push(msg);
+    } else {
+      console.log(`[seed] Inserted EQ for ${eq.source_id}`);
+    }
   }
 
-  // Insert transfer signals
+  // Insert league percentiles — delete first then insert
+  for (const perc of DEMO_PERCENTILES) {
+    const playerId = playerIdMap[perc.source_id];
+    if (!playerId) continue;
+
+    await supabase.from('league_percentiles').delete()
+      .eq('player_id', playerId)
+      .eq('league_id', perc.league_id)
+      .eq('season', '2024/25');
+
+    const rows = Object.entries(perc.stats).map(([stat_name, percentile]) => ({
+      player_id: playerId,
+      league_id: perc.league_id,
+      season: '2024/25',
+      stat_name,
+      percentile,
+    }));
+
+    const { error } = await supabase.from('league_percentiles').insert(rows);
+
+    if (error) {
+      const msg = `Percentiles ${perc.source_id}: ${error.message}`;
+      console.error('[seed]', msg);
+      errors.push(msg);
+    } else {
+      console.log(`[seed] Inserted percentiles for ${perc.source_id}`);
+    }
+  }
+
+  // Insert transfer signals (skip duplicates silently)
   for (const sig of DEMO_TRANSFER_SIGNALS) {
     await supabase.from('transfer_signals').insert({
       ...sig,
@@ -317,7 +415,8 @@ export async function seedDemo() {
     });
   }
 
-  console.log('[seed] Done.');
+  console.log('[seed] Done.', errors.length ? `Errors: ${errors.length}` : 'All OK');
+  return { ok: errors.length === 0, errors };
 }
 
 // Run directly
