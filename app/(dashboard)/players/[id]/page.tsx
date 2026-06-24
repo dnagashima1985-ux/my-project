@@ -14,23 +14,29 @@ export default async function PlayerDetailPage({ params }: PageProps) {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: player } = await supabase
-    .from('players')
-    .select(`
-      *,
-      player_style_profiles(*),
-      player_injuries(*),
-      league_percentiles(*),
-      eq_analyses(*)
-    `)
-    .eq('id', id)
-    .single();
+  const [{ data: player }, { data: eqRows }] = await Promise.all([
+    supabase
+      .from('players')
+      .select(`
+        *,
+        player_style_profiles(*),
+        player_injuries(*),
+        league_percentiles(*)
+      `)
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('eq_analyses')
+      .select('*')
+      .eq('player_id', id)
+      .limit(1),
+  ]);
 
   if (!player) notFound();
 
   const profile = player.player_style_profiles?.[0];
   const injury = player.player_injuries?.[0];
-  const eq = player.eq_analyses?.[0];
+  const eq = eqRows?.[0] ?? null;
   const percentiles = (player.league_percentiles ?? []) as LeaguePercentile[];
   const stats = player.stats ?? {};
 
