@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Plus, ChevronRight } from 'lucide-react';
+import DeleteLonglistButton from '@/components/longlist/DeleteLonglistButton';
 
 export default async function LonglistPage() {
   const supabase = await createClient();
@@ -43,22 +44,21 @@ export default async function LonglistPage() {
             const cp = l.club_profiles as ClubProfileRef | null;
             const count = Array.isArray(l.player_ids) ? l.player_ids.length : 0;
             return (
-              <Link
-                key={l.id}
-                href={`/longlist/${l.id}`}
-                className="flex items-center justify-between bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-colors"
-              >
-                <div>
-                  <div className="font-semibold text-white">{cp?.club_name ?? 'Unnamed club'}</div>
-                  <div className="text-sm text-gray-500 mt-0.5">
-                    {cp?.style && <span className="mr-3">{cp.style}</span>}
-                    <span>{count} player{count !== 1 ? 's' : ''}</span>
-                    <span className="mx-2">·</span>
-                    <span>{new Date(l.generated_at).toLocaleDateString()}</span>
+              <div key={l.id} className="flex items-center bg-gray-900 border border-gray-800 hover:border-gray-700 rounded-xl p-5 transition-colors">
+                <Link href={`/longlist/${l.id}`} className="flex items-center justify-between flex-1">
+                  <div>
+                    <div className="font-semibold text-white">{cp?.club_name ?? 'Unnamed club'}</div>
+                    <div className="text-sm text-gray-500 mt-0.5">
+                      {cp?.style && <span className="mr-3">{cp.style}</span>}
+                      <span>{count} player{count !== 1 ? 's' : ''}</span>
+                      <span className="mx-2">·</span>
+                      <span>{new Date(l.generated_at).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight size={18} className="text-gray-600" />
-              </Link>
+                  <ChevronRight size={18} className="text-gray-600" />
+                </Link>
+                <DeleteLonglistButton id={l.id} />
+              </div>
             );
           })}
         </div>
