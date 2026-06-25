@@ -106,7 +106,7 @@ Return a JSON object with section keys and content values in the selected langua
 
 export async function analyzeEQ(
   playerName: string,
-  articles: { title: string; date: string; source: string; content: string }[]
+  articles: { title: string; date: string; source: string; url: string; content: string }[]
 ): Promise<{
   total_score: number;
   dimensions: Record<string, { score: number; evidence: string[]; flags: string[] }>;
@@ -131,15 +131,17 @@ Score each of the 5 EQ dimensions (0-20 each):
 5. social_skills: Leadership, mediator vs dressing room issues
 
 Rules:
-- Unverified/single-source claims: include in evidence with ⚠ flag but DO NOT add to score
-- Show article title, date, media name for each score contribution
+- Unverified/single-source claims: include in flags array, DO NOT add to score
+- Each evidence item MUST start with the article URL followed by " | ", then title, date, source, and explanation
+- Format: "https://... | article title (date, source) — explanation"
+- If the article has no URL, omit the URL prefix entirely
 - If evidence is ambiguous, score conservatively
 
 Return JSON:
 {
   "total_score": <sum of 5 dimensions>,
   "dimensions": {
-    "self_awareness": {"score": 0-20, "evidence": ["article title (date, source) — explanation"], "flags": []},
+    "self_awareness": {"score": 0-20, "evidence": ["https://... | article title (date, source) — explanation"], "flags": []},
     "self_regulation": {"score": 0-20, "evidence": [], "flags": []},
     "motivation": {"score": 0-20, "evidence": [], "flags": []},
     "empathy": {"score": 0-20, "evidence": [], "flags": []},

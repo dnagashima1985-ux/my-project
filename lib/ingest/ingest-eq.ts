@@ -20,6 +20,7 @@ interface Article {
   title: string;
   date: string;
   source: string;
+  url: string;
   content: string;
 }
 
@@ -32,7 +33,8 @@ async function fetchArticlesNewsAPI(playerName: string): Promise<Article[]> {
   return (data.articles ?? []).map((a: Record<string, unknown>) => ({
     title: String(a.title ?? ''),
     date: String(a.publishedAt ?? '').slice(0, 10),
-    source: String((a.source as Record<string, string>)?.name ?? a.url ?? ''),
+    source: String((a.source as Record<string, string>)?.name ?? ''),
+    url: String(a.url ?? ''),
     content: String(a.description ?? a.content ?? ''),
   }));
 }
@@ -48,6 +50,7 @@ async function fetchArticlesGNews(playerName: string): Promise<Article[]> {
     title: String(a.title ?? ''),
     date: String(a.publishedAt ?? '').slice(0, 10),
     source: String((a.source as Record<string, string>)?.name ?? ''),
+    url: String((a as Record<string, unknown>).url ?? ''),
     content: String(a.description ?? a.content ?? ''),
   }));
 }

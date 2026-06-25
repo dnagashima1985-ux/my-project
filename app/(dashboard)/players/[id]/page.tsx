@@ -190,9 +190,20 @@ export default async function PlayerDetailPage({ params }: PageProps) {
                   </div>
                   {dim.evidence?.length > 0 && (
                     <ul className="mt-1 space-y-0.5">
-                      {dim.evidence.map((e: string, i: number) => (
-                        <li key={i} className="text-xs text-gray-600">· {e}</li>
-                      ))}
+                      {dim.evidence.map((e: string, i: number) => {
+                        const hasUrl = e.startsWith('http');
+                        const sepIdx = hasUrl ? e.indexOf(' | ') : -1;
+                        const url = hasUrl && sepIdx > 0 ? e.slice(0, sepIdx) : null;
+                        const text = url ? e.slice(sepIdx + 3) : e;
+                        return (
+                          <li key={i} className="text-xs text-gray-600">
+                            ·{' '}
+                            {url ? (
+                              <a href={url} target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 underline underline-offset-2">{text}</a>
+                            ) : text}
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                   {dim.flags?.length > 0 && (
