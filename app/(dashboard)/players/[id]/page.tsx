@@ -178,7 +178,7 @@ export default async function PlayerDetailPage({ params }: PageProps) {
           </div>
           {eq.verdict && <p className="text-xs text-gray-500 mb-3">{eq.verdict}</p>}
           {eq.dimensions && (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {Object.entries(eq.dimensions as EQDimensions).map(([key, dim]) => (
                 <div key={key}>
                   <div className="flex items-center justify-between text-xs mb-1">
@@ -188,6 +188,20 @@ export default async function PlayerDetailPage({ params }: PageProps) {
                   <div className="h-1 bg-gray-800 rounded-full overflow-hidden">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(dim.score / 20) * 100}%` }} />
                   </div>
+                  {dim.evidence?.length > 0 && (
+                    <ul className="mt-1 space-y-0.5">
+                      {dim.evidence.map((e, i) => (
+                        <li key={i} className="text-xs text-gray-600">· {e}</li>
+                      ))}
+                    </ul>
+                  )}
+                  {dim.flags?.length > 0 && (
+                    <ul className="mt-0.5 space-y-0.5">
+                      {dim.flags.map((f, i) => (
+                        <li key={i} className="text-xs text-yellow-700">⚠ {f}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ))}
             </div>

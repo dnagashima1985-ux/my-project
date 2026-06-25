@@ -210,10 +210,56 @@ const DEMO_INJURIES = [
 ];
 
 const DEMO_EQ = [
-  { source_id: 'demo-001', total_score: 78, grade: 'HIGH', verdict: 'Consistently takes responsibility in post-match interviews. Respected by teammates and noted for leadership qualities.' },
-  { source_id: 'demo-002', total_score: 82, grade: 'HIGH', verdict: 'Strong motivation and self-awareness. No disciplinary issues. Positive media coverage across multiple sources.' },
-  { source_id: 'demo-003', total_score: 55, grade: 'MEDIUM', verdict: 'Generally positive but occasional frustration on the pitch. No major incidents off the field.' },
-  { source_id: 'demo-006', total_score: 44, grade: 'MEDIUM', verdict: 'Some disciplinary concerns. Red card incident with disputed circumstances. Generally cooperative with media.' },
+  {
+    source_id: 'demo-001', total_score: 78, grade: 'HIGH',
+    verdict: 'Consistently takes responsibility in post-match interviews. Respected by teammates and noted for leadership qualities.',
+    evidence: {
+      self_awareness:  ['Post-match interview vs Djurgården (2024-04-18, Aftonbladet) — credited teammates, did not deflect criticism after 1-0 loss'],
+      self_regulation: ['No disciplinary sanctions across 28 appearances (Allsvenskan official records 2024)'],
+      motivation:      ['Pre-season interview (2024-01-30, Fotbollskanalen) — expressed ambition to reach European level within two years'],
+      empathy:         ['Captain\'s statement after Hammarby derby (2024-05-05, SVT Sport) — publicly praised young substitute\'s impact'],
+      social_skills:   ['Teammate quotes in squad profile (2024-08-12, AIK official) — described as "calm head in tense moments"'],
+    },
+    flags: {},
+  },
+  {
+    source_id: 'demo-002', total_score: 82, grade: 'HIGH',
+    verdict: 'Strong motivation and self-awareness. No disciplinary issues. Positive media coverage across multiple sources.',
+    evidence: {
+      self_awareness:  ['Post-match quotes after J1 loss (2024-06-22, Sponichi) — acknowledged personal positioning error'],
+      self_regulation: ['Zero bookings in 30 J1 League appearances (J.League official stats 2024)'],
+      motivation:      ['Interview on European ambitions (2024-02-14, Goal Japan) — detailed training improvements made in off-season'],
+      empathy:         ['Gamba Osaka team interview (2024-09-01, NHK Sports) — praised youth academy integration'],
+      social_skills:   ['Three separate teammates cited him as team leader in end-of-season awards coverage (2024-12-01, Sportiva)'],
+    },
+    flags: {},
+  },
+  {
+    source_id: 'demo-003', total_score: 55, grade: 'MEDIUM',
+    verdict: 'Generally positive but occasional frustration on the pitch. No major incidents off the field.',
+    evidence: {
+      self_awareness:  ['Post-match comment after Porto loss (2024-10-03, Record) — acknowledged missed chances but attributed some to goalkeeper'],
+      self_regulation: ['Yellow card for dissent vs Sporting CP (2024-11-09, Zerozero) — disputed referee decision publicly'],
+      motivation:      ['Pre-season interview (2024-01-20, A Bola) — stated goal of 20 league goals'],
+      empathy:         [],
+      social_skills:   ['Described as "professional" by manager in press conference (2024-07-15, SC Braga official)'],
+    },
+    flags: {
+      self_awareness: ['⚠ Single source claim that he argued with assistant coach — not corroborated (2024-09-28, anonymous forum post)'],
+    },
+  },
+  {
+    source_id: 'demo-006', total_score: 44, grade: 'MEDIUM',
+    verdict: 'Some disciplinary concerns. Red card incident with disputed circumstances. Generally cooperative with media.',
+    evidence: {
+      self_awareness:  ['Post-red card interview (2024-03-17, Marca) — disputed the decision rather than accepting responsibility'],
+      self_regulation: ['Red card vs Villarreal (2024-03-14, La Liga official) — straight red for violent conduct; later reduced on appeal'],
+      motivation:      ['Training ground profile (2024-08-05, Alavés official) — described as dedicated and first to arrive'],
+      empathy:         [],
+      social_skills:   ['Generally positive media presence; no dressing room incidents reported'],
+    },
+    flags: {},
+  },
 ];
 
 const DEMO_PERCENTILES: Array<{
@@ -353,17 +399,19 @@ export async function seedDemo(): Promise<{ ok: boolean; errors: string[] }> {
 
     await supabase.from('eq_analyses').delete().eq('player_id', playerId);
 
+    const ev = (eq as unknown as { evidence?: Record<string, string[]> }).evidence ?? {};
+    const fl = (eq as unknown as { flags?: Record<string, string[]> }).flags ?? {};
     const { error } = await supabase.from('eq_analyses').insert({
       player_id: playerId,
       article_count: 8,
       total_score: eq.total_score,
       grade: eq.grade,
       dimensions: {
-        self_awareness:  { score: Math.round(eq.total_score * 0.22), evidence: [], flags: [] },
-        self_regulation: { score: Math.round(eq.total_score * 0.20), evidence: [], flags: [] },
-        motivation:      { score: Math.round(eq.total_score * 0.20), evidence: [], flags: [] },
-        empathy:         { score: Math.round(eq.total_score * 0.19), evidence: [], flags: [] },
-        social_skills:   { score: Math.round(eq.total_score * 0.19), evidence: [], flags: [] },
+        self_awareness:  { score: Math.round(eq.total_score * 0.22), evidence: ev.self_awareness  ?? [], flags: fl.self_awareness  ?? [] },
+        self_regulation: { score: Math.round(eq.total_score * 0.20), evidence: ev.self_regulation ?? [], flags: fl.self_regulation ?? [] },
+        motivation:      { score: Math.round(eq.total_score * 0.20), evidence: ev.motivation      ?? [], flags: fl.motivation      ?? [] },
+        empathy:         { score: Math.round(eq.total_score * 0.19), evidence: ev.empathy         ?? [], flags: fl.empathy         ?? [] },
+        social_skills:   { score: Math.round(eq.total_score * 0.19), evidence: ev.social_skills   ?? [], flags: fl.social_skills   ?? [] },
       },
       verdict: eq.verdict,
       analysed_at: new Date().toISOString(),
