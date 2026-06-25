@@ -14,12 +14,22 @@ export async function POST(req: NextRequest) {
     .eq('id', user.id)
     .single();
 
-  // Report builder is Pro+ only
-  if (!profile || profile.plan === 'trial' || profile.plan === 'starter') {
-    return NextResponse.json(
-      { error: 'Report builder requires Pro or Elite plan', redirect: '/settings#plans' },
-      { status: 403 }
-    );
+  const plan = profile?.plan ?? 'trial';
+  const isPaidPlan = plan !== 'trial' && plan !== 'starter';
+
+  if (!isPaidPlan) {
+    // Trial/starter users get 1 free report
+    const { count } = await supabase
+      .from('reports')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if ((count ?? 0) >= 1) {
+      return NextResponse.json(
+        { error: 'Trial users can generate 1 report. Upgrade to Pro or Elite for unlimited reports.', redirect: '/settings#plans' },
+        { status: 403 }
+      );
+    }
   }
 
   const body = await req.json();
