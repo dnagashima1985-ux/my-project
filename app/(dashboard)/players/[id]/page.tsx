@@ -190,14 +190,14 @@ export default async function PlayerDetailPage({ params }: PageProps) {
                   </div>
                   {dim.evidence?.length > 0 && (
                     <ul className="mt-1 space-y-0.5">
-                      {dim.evidence.map((e, i) => (
+                      {dim.evidence.map((e: string, i: number) => (
                         <li key={i} className="text-xs text-gray-600">· {e}</li>
                       ))}
                     </ul>
                   )}
                   {dim.flags?.length > 0 && (
                     <ul className="mt-0.5 space-y-0.5">
-                      {dim.flags.map((f, i) => (
+                      {dim.flags.map((f: string, i: number) => (
                         <li key={i} className="text-xs text-yellow-700">⚠ {f}</li>
                       ))}
                     </ul>
