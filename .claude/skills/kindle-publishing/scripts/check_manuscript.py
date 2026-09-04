@@ -13,7 +13,10 @@ Checks:
   3. full-width digits, which read badly on Kindle
   4. stray non-Japanese scripts (Cyrillic/Hangul) from a slip of the keyboard
   5. repeated key figures, so a number quoted in two chapters can be eyeballed
-  6. per-chapter and total character counts against the target
+  6. chapters with no deep-dive section (warning only — a chapter that only
+     restates the source reads thin, and that is invisible when proofreading
+     one chapter at a time)
+  7. per-chapter and total character counts against the target
 """
 
 import collections
@@ -26,6 +29,12 @@ import sys
 # prose ("囁く才能はここにいる") and train you to ignore the report.
 PLACEHOLDERS = ["著者名", "TODO", "TBD", "XXX", "FIXME", "仮題", "（未定）",
                 "ここに挿入", "＿＿", "本文をここに"]
+
+# Chapters carrying only borrowed facts read thin. Each main chapter should
+# have one section that goes a step below the source: mechanism, worked
+# calculation, or a named case. Front and back matter are exempt.
+DEEPDIVE = re.compile(r"^#{2,3}\s*(もう一段深く|深掘り|コラム|なぜ)", re.M)
+NO_DEEPDIVE_NEEDED = ("はじめに", "終章", "付録", "出典", "奥付")
 
 VARIANTS = [
     ("見落とし", "見落し"), ("引き継ぎ", "引継ぎ"), ("問い合わせ", "問合せ"),
@@ -97,6 +106,19 @@ def main(cfg_path):
     for n, c in sorted(nums.items(), key=lambda kv: -kv[1]):
         if c >= 2:
             print("  %-12s %d章" % (n, c))
+
+    print("== 深掘りのない章（注意） ==")
+    thin = 0
+    for f, nav in cfg["chapters"]:
+        if any(k in nav for k in NO_DEEPDIVE_NEEDED):
+            continue
+        if not DEEPDIVE.search(text[f]):
+            print("  - %s（%s）機序・計算・事例のどれかを1つ足す" % (f, nav))
+            thin += 1
+    if thin:
+        print("  （この見出しの規約より前に書いた本では全章が並ぶ。無視してよい）")
+    else:
+        print("  なし")
 
     print("== 文字数 ==")
     total = 0
