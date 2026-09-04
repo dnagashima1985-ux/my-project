@@ -17,24 +17,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "src")
 OUT = os.path.join(HERE, "build")
 
-TITLE = "才能を見落とさない技術"
-SUBTITLE = "育成年代のタレントID実践ガイド — FIFAの5次元モデルを日本の現場に実装する"
+TITLE = "才能は、こぼれている"
+SUBTITLE = "育成年代スカウティング 七つの関門と、見落としを減らす技術"
 AUTHOR = "著者名"
 LANG = "ja"
 
 FILES = [
-    ("00-front.md", "はじめに"),
-    ("01-intro.md", "序章 見つけることは、始まりにすぎない"),
-    ("02-ch1.md", "第1章 哲学"),
-    ("03-ch2.md", "第2章 プロファイル"),
-    ("04-ch3.md", "第3章 発見"),
-    ("05-ch4.md", "第4章 選考"),
-    ("06-ch5.md", "第5章 バイアス"),
-    ("07-ch6.md", "第6章 データ"),
-    ("08-ch7.md", "第7章 定数"),
-    ("09-ch8.md", "第8章 90日で始める"),
-    ("10-outro.md", "終章 選手である前に、子どもである"),
-    ("11-appendix.md", "付録・出典"),
+    ("00-hajimeni.md", "はじめに"),
+    ("01-jyoshou.md", "序章 才能は、こぼれている"),
+    ("02-gate1-sonzai.md", "第1関門 存在"),
+    ("03-gate2-kashi.md", "第2関門 可視"),
+    ("04-gate3-shikibetsu.md", "第3関門 識別"),
+    ("05-gate4-kiroku.md", "第4関門 記録"),
+    ("06-gate5-goui.md", "第5関門 合意"),
+    ("07-gate6-jikan.md", "第6関門 時間"),
+    ("08-gate7-kaiki.md", "第7関門 回帰"),
+    ("09-audit.md", "第8章 監査"),
+    ("10-90days.md", "第9章 90日"),
+    ("11-shushou.md", "終章 選手である前に、子どもである"),
+    ("12-appendix.md", "付録・出典"),
 ]
 
 CSS = """\
@@ -168,7 +169,7 @@ def page(title, body):
 
 def build():
     os.makedirs(OUT, exist_ok=True)
-    book_id = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_DNS, "talent-id-guide-ja"))
+    book_id = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_DNS, "sainou-wa-koborete-iru"))
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     chapters = []
@@ -226,7 +227,7 @@ def build():
         '  </rootfiles>\n</container>\n'
     )
 
-    epub_path = os.path.join(OUT, "talent-id-guide-ja.epub")
+    epub_path = os.path.join(OUT, "sainou-wa-koborete-iru.epub")
     with zipfile.ZipFile(epub_path, "w") as z:
         z.writestr("mimetype", "application/epub+zip", compress_type=zipfile.ZIP_STORED)
         z.writestr("META-INF/container.xml", container, zipfile.ZIP_DEFLATED)
@@ -238,7 +239,7 @@ def build():
             z.writestr("OEBPS/" + fn, page(t, body), zipfile.ZIP_DEFLATED)
 
     # single-file markdown for editing / Word import
-    combined = os.path.join(OUT, "talent-id-guide-ja.md")
+    combined = os.path.join(OUT, "sainou-wa-koborete-iru.md")
     with open(combined, "w", encoding="utf-8") as f:
         f.write("# %s\n\n## %s\n\n---\n\n" % (TITLE, SUBTITLE))
         for fname, _t in FILES:
