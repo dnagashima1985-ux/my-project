@@ -17,9 +17,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "src")
 OUT = os.path.join(HERE, "build")
 
-TITLE = "才能は、こぼれている"
-SUBTITLE = "育成年代スカウティング 七つの関門と、見落としを減らす技術"
-AUTHOR = "著者名"
+TITLE = "才能を見落とさない七つの関門"
+SUBTITLE = "育成年代スカウティングの設計図"
+AUTHOR = "フットボールパラダイム"
 LANG = "ja"
 
 FILES = [
@@ -169,7 +169,7 @@ def page(title, body):
 
 def build():
     os.makedirs(OUT, exist_ok=True)
-    book_id = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_DNS, "sainou-wa-koborete-iru"))
+    book_id = "urn:uuid:" + str(uuid.uuid5(uuid.NAMESPACE_DNS, "nanatsu-no-kanmon"))
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     chapters = []
@@ -227,7 +227,7 @@ def build():
         '  </rootfiles>\n</container>\n'
     )
 
-    epub_path = os.path.join(OUT, "sainou-wa-koborete-iru.epub")
+    epub_path = os.path.join(OUT, "nanatsu-no-kanmon.epub")
     with zipfile.ZipFile(epub_path, "w") as z:
         z.writestr("mimetype", "application/epub+zip", compress_type=zipfile.ZIP_STORED)
         z.writestr("META-INF/container.xml", container, zipfile.ZIP_DEFLATED)
@@ -239,7 +239,7 @@ def build():
             z.writestr("OEBPS/" + fn, page(t, body), zipfile.ZIP_DEFLATED)
 
     # single-file markdown for editing / Word import
-    combined = os.path.join(OUT, "sainou-wa-koborete-iru.md")
+    combined = os.path.join(OUT, "nanatsu-no-kanmon.md")
     with open(combined, "w", encoding="utf-8") as f:
         f.write("# %s\n\n## %s\n\n---\n\n" % (TITLE, SUBTITLE))
         for fname, _t in FILES:

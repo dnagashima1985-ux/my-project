@@ -1,6 +1,6 @@
-# 才能は、こぼれている — 原稿一式
+# 才能を見落とさない七つの関門 — 原稿一式
 
-副題：育成年代スカウティング 七つの関門と、見落としを減らす技術
+副題：育成年代スカウティングの設計図／著：フットボールパラダイム
 
 日本の育成現場向けに書き下ろしたオリジナルの実務書です。骨格は独自の
 「七つの関門（存在・可視・識別・記録・合意・時間・回帰）」モデル。
@@ -27,8 +27,8 @@ book/
 │   └── 12-appendix.md          付録A-C・出典・免責
 ├── build_epub.py               EPUB3ビルドスクリプト（依存パッケージなし）
 └── build/
-    ├── sainou-wa-koborete-iru.epub   KDPに直接アップロードできるEPUB
-    └── sainou-wa-koborete-iru.md     全章を結合した単一Markdown（Word取込用）
+    ├── nanatsu-no-kanmon.epub   KDPに直接アップロードできるEPUB
+    └── nanatsu-no-kanmon.md     全章を結合した単一Markdown（Word取込用）
 ```
 
 本文およそ51,000字（空白除く）／全13セクション。
@@ -45,24 +45,36 @@ python3 build_epub.py
 `src/` のMarkdownを編集して再実行すれば、EPUBと結合Markdownが再生成されます。
 Python標準ライブラリのみ使用。pandoc等は不要です。
 
-## 出版前に決めること
+## 表紙
 
-`build_epub.py` の先頭にある定数を書き換えてください。
+`cover/` に3案あります（1600×2560px・JPEG、KDPにそのまま入稿可）。
+既刊シリーズの体裁——フラットな色面、極太ゴシックの2行タイトル、
+タイトル脇に小さく著者名、下部に煽りコピー、右下にギザギザの
+シリーズバッジ「サッカー指導者にひらめきを」——に合わせています。
 
-- `AUTHOR` — 著者名（現在 "著者名" のままです）
-- `TITLE` / `SUBTITLE` — 変更する場合
+| ファイル | 案 |
+|---|---|
+| `cover/cover-a-navy.jpg` | 紺地×オレンジ。整列したドットが崩れて落ちる |
+| `cover/cover-b-white.jpg` | 生成り地×黒＋オレンジ。既刊に最も近い |
+| `cover/cover-c-gates.jpg` | 生成り地×紺。七関門の図解（100→8） |
 
-表紙画像はEPUBに含めていません。KDPの表紙クリエイターを使うか、
-1600×2560px以上のJPG/TIFFを別途用意してアップロード時に指定してください。
+```bash
+cd cover && python3 build_covers.py   # out/ に再生成
+```
+
+文言・色は `cover/build_covers.py` 冒頭の定数（TITLE_1 / TITLE_2 /
+SUBTITLE / AUTHOR / HOOK / COPY_1 / COPY_2 / BADGE）で変更できます。
+和文フォント（Noto Sans JP のサブセット）は `cover/fonts/` に同梱、
+描画は同梱のChromium、書き出しはPillowで、外部サービスは不要です。
 
 ## KDPへの入稿
 
 1. KDPで「電子書籍」を新規作成
-2. 原稿ファイルに `build/sainou-wa-koborete-iru.epub` をアップロード
+2. 原稿ファイルに `build/nanatsu-no-kanmon.epub` をアップロード
 3. 表紙を設定し、プレビューアで目次と表組みの表示を確認
 4. カテゴリは「スポーツ・アウトドア > サッカー」「ビジネス・経済 > マネジメント」あたり
 
-Word原稿から進めたい場合は `build/sainou-wa-koborete-iru.md` をWordに読み込み、
+Word原稿から進めたい場合は `build/nanatsu-no-kanmon.md` をWordに読み込み、
 見出しスタイルを割り当ててから .docx として保存してください。
 
 ## 著作権についての注意
