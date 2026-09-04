@@ -26,6 +26,7 @@ book/
 │   ├── 10-90days.md            第9章 90日の実装順序
 │   ├── 11-shushou.md           終章
 │   └── 12-appendix.md          付録A-C・出典・免責
+├── kdp-listing.md              KDP出品用テキスト（内容紹介・キーワード・価格）
 ├── build_epub.py               EPUB3ビルドスクリプト（依存パッケージなし）
 └── build/
     ├── nanatsu-no-kanmon.epub   KDPに直接アップロードできるEPUB
@@ -70,10 +71,16 @@ SUBTITLE / PUBLISHER / HOOK / COPY_1 / COPY_2 / BADGE）で変更できます。
 
 ## KDPへの入稿
 
+`kdp-listing.md` に、各入力欄へそのまま貼れるテキストをまとめてあります
+（内容紹介・キーワード7つ・カテゴリ2つ・価格の推奨・著者略歴の雛形・
+出版前チェックリスト）。
+
 1. KDPで「電子書籍」を新規作成
-2. 原稿ファイルに `build/nanatsu-no-kanmon.epub` をアップロード
-3. 表紙を設定し、プレビューアで目次と表組みの表示を確認
-4. カテゴリは「スポーツ・アウトドア > サッカー」「ビジネス・経済 > マネジメント」あたり
+2. `kdp-listing.md` からタイトル・内容紹介・キーワード・カテゴリを転記
+3. 原稿ファイルに `build/nanatsu-no-kanmon.epub` をアップロード
+4. 表紙 `cover/cover-*.jpg` をアップロード
+5. プレビューアで目次・表組み・奥付の表示を確認（表が多いので要チェック）
+6. 価格 ¥450／70%ロイヤリティ／KDPセレクトを設定
 
 Word原稿から進めたい場合は `build/nanatsu-no-kanmon.md` をWordに読み込み、
 見出しスタイルを割り当ててから .docx として保存してください。
