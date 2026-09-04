@@ -1,5 +1,5 @@
 ---
-name: kdp-book-production
+name: kindle-publishing
 description: |
   日本語のKindle実務書（KDP）を、参考資料から独自フレームワークで書き下ろし、
   EPUB・表紙3案・KDP入稿テキストまで一括で仕上げる制作パイプライン。
