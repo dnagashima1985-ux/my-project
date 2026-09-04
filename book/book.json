@@ -1,0 +1,36 @@
+{
+  "slug": "nanatsu-no-kanmon",
+  "title": "才能を見落とさない七つの関門",
+  "subtitle": "育成年代スカウティングの設計図",
+  "author": "フットボールパラダイム",
+  "publisher": "フットボールパラダイム",
+  "lang": "ja",
+  "target_chars": 50000,
+  "chapters": [
+    ["00-hajimeni.md", "はじめに"],
+    ["01-jyoshou.md", "序章 才能は、こぼれている"],
+    ["02-gate1-sonzai.md", "第1関門 存在"],
+    ["03-gate2-kashi.md", "第2関門 可視"],
+    ["04-gate3-shikibetsu.md", "第3関門 識別"],
+    ["05-gate4-kiroku.md", "第4関門 記録"],
+    ["06-gate5-goui.md", "第5関門 合意"],
+    ["07-gate6-jikan.md", "第6関門 時間"],
+    ["08-gate7-kaiki.md", "第7関門 回帰"],
+    ["09-audit.md", "第8章 監査"],
+    ["10-90days.md", "第9章 90日"],
+    ["11-shushou.md", "終章 選手である前に、子どもである"],
+    ["12-appendix.md", "付録・出典"]
+  ],
+  "cover": {
+    "title_1": "才能を見落とさない",
+    "title_2": "七つの関門",
+    "hook": "才能は、こぼれている",
+    "copy": ["見つける技術より、", "見落とさない仕組みを"],
+    "badge": ["サッカー", "指導者に", "ひらめきを"],
+    "badge_color": "#1B5FA8",
+    "accent": "#F08A24",
+    "diagram_labels": ["存在", "可視", "識別", "記録", "合意", "時間", "回帰"],
+    "diagram_numbers": ["100", "8"],
+    "layouts": ["white", "navy", "diagram"]
+  }
+}
