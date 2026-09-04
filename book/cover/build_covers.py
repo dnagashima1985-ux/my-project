@@ -29,7 +29,7 @@ W, H = 1600, 2560
 TITLE_1 = "才能を見落とさない"
 TITLE_2 = "七つの関門"
 SUBTITLE = "育成年代スカウティングの設計図"
-AUTHOR = "フットボールパラダイム"
+PUBLISHER = "フットボールパラダイム"
 HOOK = "才能は、こぼれている"
 COPY_1 = "見つける技術より、"
 COPY_2 = "見落とさない仕組みを"
@@ -130,13 +130,13 @@ svg.art{position:absolute;inset:0}
     body = """
 <div class="page">
   <svg class="art" width="%d" height="%d">%s</svg>
-  <div class="byline">著　%s</div>
+  <div class="byline">発行元　%s</div>
   <div class="title"><div class="t1">%s</div><div class="t2">%s</div></div>
   <div class="sub">%s</div>
   <div class="hook">%s</div>
   <div class="copy">%s<br>%s</div>
   %s
-</div>""" % (W, H, "".join(circles), AUTHOR, TITLE_1, TITLE_2, SUBTITLE,
+</div>""" % (W, H, "".join(circles), PUBLISHER, TITLE_1, TITLE_2, SUBTITLE,
              HOOK, COPY_1, COPY_2, badge("#F08A24"))
     return css, body
 
@@ -186,13 +186,13 @@ svg.art{position:absolute;inset:0}
 <div class="page">
   <svg class="art" width="%d" height="%d">%s</svg>
   <div class="bar"></div>
-  <div class="byline">著　%s</div>
+  <div class="byline">発行元　%s</div>
   <div class="title"><div class="t1">%s</div><div class="t2">%s</div></div>
   <div class="sub">%s</div>
   <div class="hook">%s</div>
   <div class="copy">%s<br>%s</div>
   %s
-</div>""" % (W, H, "".join(circles), AUTHOR, TITLE_1, TITLE_2, SUBTITLE,
+</div>""" % (W, H, "".join(circles), PUBLISHER, TITLE_1, TITLE_2, SUBTITLE,
              HOOK, COPY_1, COPY_2, badge("#1B5FA8"))
     return css, body
 
@@ -239,13 +239,13 @@ svg.art{position:absolute;inset:0}
     body = """
 <div class="page">
   <svg class="art" width="%d" height="%d">%s</svg>
-  <div class="byline">著　%s</div>
+  <div class="byline">発行元　%s</div>
   <div class="title"><div class="t1">%s</div><div class="t2">%s</div></div>
   <div class="sub">%s</div>
   <div class="hook">%s</div>
   <div class="copy">%s<br>%s</div>
   %s
-</div>""" % (W, H, "".join(parts), AUTHOR, TITLE_1, TITLE_2, SUBTITLE,
+</div>""" % (W, H, "".join(parts), PUBLISHER, TITLE_1, TITLE_2, SUBTITLE,
              HOOK, COPY_1, COPY_2, badge("#123B6D"))
     return css, body
 

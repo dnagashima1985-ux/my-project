@@ -20,6 +20,7 @@ OUT = os.path.join(HERE, "build")
 TITLE = "才能を見落とさない七つの関門"
 SUBTITLE = "育成年代スカウティングの設計図"
 AUTHOR = "フットボールパラダイム"
+PUBLISHER = "フットボールパラダイム"
 LANG = "ja"
 
 FILES = [
@@ -61,6 +62,7 @@ strong { font-weight: bold; }
 .titlepage h1 { border: 0; page-break-before: auto; font-size: 2em; }
 .titlepage .sub { font-size: 1em; margin-top: 1.5em; line-height: 1.7; }
 .titlepage .author { margin-top: 3em; font-size: 1.1em; }
+.titlepage .publisher { margin-top: .8em; font-size: .95em; }
 """
 
 
@@ -181,8 +183,9 @@ def build():
 
     title_body = (
         '<div class="titlepage">\n<h1>%s</h1>\n<p class="sub">%s</p>\n'
-        '<p class="author">%s</p>\n</div>\n' % (
-            html.escape(TITLE), html.escape(SUBTITLE), html.escape(AUTHOR))
+        '<p class="author">%s</p>\n<p class="publisher">発行元　%s</p>\n</div>\n' % (
+            html.escape(TITLE), html.escape(SUBTITLE), html.escape(AUTHOR),
+            html.escape(PUBLISHER))
     )
 
     nav_items = "\n".join(
@@ -208,13 +211,15 @@ def build():
         '    <dc:identifier id="bookid">%s</dc:identifier>\n'
         '    <dc:title>%s</dc:title>\n'
         '    <dc:creator>%s</dc:creator>\n'
+        '    <dc:publisher>%s</dc:publisher>\n'
         '    <dc:language>%s</dc:language>\n'
         '    <dc:description>%s</dc:description>\n'
         '    <meta property="dcterms:modified">%s</meta>\n'
         '  </metadata>\n'
         '  <manifest>\n    %s\n  </manifest>\n'
         '  <spine>\n    %s\n  </spine>\n'
-        '</package>\n' % (book_id, html.escape(TITLE), html.escape(AUTHOR), LANG,
+        '</package>\n' % (book_id, html.escape(TITLE), html.escape(AUTHOR),
+                          html.escape(PUBLISHER), LANG,
                           html.escape(SUBTITLE), now,
                           "\n    ".join(manifest), "\n    ".join(spine))
     )
