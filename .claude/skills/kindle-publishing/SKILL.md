@@ -33,10 +33,23 @@ description: |
 ## 全体の流れ
 
 ```
-資料を読む → 独自フレームを設計 → book.json → 章を書く
+new_book.py で骨組みを作る → 資料を読む（証拠カード） → 独自フレームを設計
+   → book.json を仕上げる → 章を書く
    → check_manuscript.py → build_epub.py → build_cover.py
    → KDP入力シート＋出品テキスト → 納品
 ```
+
+### 0. 骨組みを作る
+
+```bash
+python3 <skill>/scripts/new_book.py <slug> --title "タイトル" --chapters 7
+```
+
+`book.json`、`notes/evidence.md`、`src/` の章ひな形（章の型どおりの見出し入り）が
+一度に出る。ひな形には **TODO が埋め込んである**——`check_manuscript.py` が
+TODO で落ちるので、書きかけの本を誤ってビルドできない。
+`--chapters` は本編の章数（枠組みの数）。章数が決まるのは資料を読んだあとなので、
+先に骨組みだけ作って、あとから章を足し引きしてもよい。
 
 ### 1. 資料を読み、証拠カードを作る
 
@@ -158,7 +171,9 @@ python3 <skill>/scripts/build_cover.py    book.json
 - **build_epub.py** — `build/<slug>.epub`（KDPに直接入稿可）と結合Markdown。
   タイトルページ・目次・`dc:publisher` 入り。標準ライブラリのみ
 - **build_cover.py** — `cover/<slug>-<layout>.jpg` を1600×2560で。和文フォントは
-  実際に使う文字だけをGoogle Fontsから取ってくるので、どんなタイトルでも化けない
+  実際に使う文字だけをGoogle Fontsから取ってくるので、どんなタイトルでも化けない。
+  ブラウザが無い環境（チャットだけの場所、素のコンテナ）ではPillowで同じ図版を
+  直接描く。`COVER_RENDERER=pillow` で明示指定もできる
 
 いずれも `book.json` のあるディレクトリで実行する。
 
@@ -226,7 +241,7 @@ python3 <skill>/scripts/build_cover.py    book.json
 ## 出力の置き場所
 
 ```
-<作業ディレクトリ>/
+<作業ディレクトリ>/          new_book.py がこの形を作る
 ├── book.json
 ├── notes/          証拠カード（evidence.md）。原稿の裏づけ
 ├── src/            章ごとのMarkdown
@@ -251,6 +266,8 @@ python3 <skill>/scripts/build_cover.py    book.json
 **フォントが落ちてこない** — ネットワークが無いと英数字だけ描画される。
 `cover/.fonts/` にキャッシュが残っていれば再利用される。
 
-**Chromiumが見つからない** — `CHROME=/path/to/chrome` を環境変数で渡す。
+**Chromiumが見つからない** — そのままPillowで描くので止まらない。特定の
+ブラウザを使いたいときだけ `CHROME=/path/to/chrome` を渡す。Pillow版は
+ブラウザ版と数ピクセルずれるが、入稿できる表紙になる。
 
 **EPUBのJPEG変換でPillowが無い** — `pip3 install Pillow`。
