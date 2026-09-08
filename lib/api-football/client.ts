@@ -1,4 +1,4 @@
-// API-Football client for injury data
+// API-Football client
 
 const BASE_URL = 'https://v3.football.api-sports.io';
 const API_KEY = process.env.API_FOOTBALL_KEY!;
@@ -14,6 +14,139 @@ async function request<T>(path: string, params: Record<string, string> = {}): Pr
 
   if (!res.ok) throw new Error(`API-Football error: ${res.status} ${path}`);
   return res.json();
+}
+
+// ── Player stats ──────────────────────────────────────────────────────────────
+
+export interface APIFootballPlayerResponse {
+  player: {
+    id: number;
+    name: string;
+    age: number;
+    birth: { date: string; country: string };
+    nationality: string;
+    height: string | null; // "178 cm"
+    weight: string | null;
+    photo: string;
+  };
+  statistics: Array<{
+    team: { id: number; name: string };
+    league: { id: number; name: string; season: number };
+    games: { appearences: number | null; minutes: number | null; position: string };
+    goals: { total: number | null; assists: number | null };
+    shots: { total: number | null; on: number | null };
+    passes: { total: number | null; key: number | null; accuracy: string | number | null };
+    tackles: { total: number | null; interceptions: number | null };
+    duels: { total: number | null; won: number | null };
+    dribbles: { attempts: number | null; success: number | null };
+    cards: { yellow: number | null; red: number | null };
+  }>;
+}
+
+export interface NormalisedPlayerStats {
+  api_football_id: number;
+  name: string;
+  age: number;
+  nationality: string;
+  height_cm: number | undefined;
+  current_club: string;
+  league: string;
+  position: string;
+  stats: {
+    goals: number;
+    assists: number;
+    xg?: number;
+    npxg?: number;
+    xa?: number;
+    shots: number;
+    shots_on_target: number;
+    pass_count: number;
+    pass_accuracy: number;
+    key_passes: number;
+    dribble_success: number;
+    dribble_success_rate: number;
+    tackles: number;
+    interceptions: number;
+    aerial_duel_win_pct?: number;
+    yellow_cards: number;
+    red_cards: number;
+    appearances: number;
+    minutes_played: number;
+  };
+}
+
+function normalise(r: APIFootballPlayerResponse): NormalisedPlayerStats | null {
+  const s = r.statistics[0];
+  if (!s) return null;
+
+  const heightCm = r.player.height
+    ? parseInt(r.player.height.replace(/\D/g, ''), 10) || null
+    : null;
+
+  const passAcc = typeof s.passes.accuracy === 'string'
+    ? parseFloat(s.passes.accuracy)
+    : (s.passes.accuracy ?? 0);
+
+  const dribbleAttempts = s.dribbles.attempts ?? 0;
+  const dribbleSuccess = s.dribbles.success ?? 0;
+
+  const duelTotal = s.duels.total ?? 0;
+  const duelWon = s.duels.won ?? 0;
+
+  return {
+    api_football_id: r.player.id,
+    name: r.player.name,
+    age: r.player.age,
+    nationality: r.player.nationality,
+    height_cm: heightCm ?? undefined,
+    current_club: s.team.name,
+    league: s.league.name,
+    position: s.games.position,
+    stats: {
+      goals: s.goals.total ?? 0,
+      assists: s.goals.assists ?? 0,
+      shots: s.shots.total ?? 0,
+      shots_on_target: s.shots.on ?? 0,
+      pass_count: s.passes.total ?? 0,
+      pass_accuracy: passAcc,
+      key_passes: s.passes.key ?? 0,
+      dribble_success: dribbleSuccess,
+      dribble_success_rate: dribbleAttempts > 0 ? (dribbleSuccess / dribbleAttempts) * 100 : 0,
+      tackles: s.tackles.total ?? 0,
+      interceptions: s.tackles.interceptions ?? 0,
+      aerial_duel_win_pct: duelTotal > 0 ? (duelWon / duelTotal) * 100 : undefined,
+      yellow_cards: s.cards.yellow ?? 0,
+      red_cards: s.cards.red ?? 0,
+      appearances: s.games.appearences ?? 0,
+      minutes_played: s.games.minutes ?? 0,
+    },
+  };
+}
+
+export async function searchPlayerByName(
+  name: string,
+  season: number
+): Promise<NormalisedPlayerStats[]> {
+  const data = await request<{ response: APIFootballPlayerResponse[] }>(
+    '/players',
+    { search: name, season: String(season) }
+  );
+  return data.response.flatMap((r) => {
+    const n = normalise(r);
+    return n ? [n] : [];
+  });
+}
+
+export async function getPlayerStatsByApiId(
+  apiFootballId: number,
+  season: number
+): Promise<NormalisedPlayerStats | null> {
+  const data = await request<{ response: APIFootballPlayerResponse[] }>(
+    '/players',
+    { id: String(apiFootballId), season: String(season) }
+  );
+  const first = data.response[0];
+  return first ? normalise(first) : null;
 }
 
 export interface APIFootballInjury {
