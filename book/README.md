@@ -57,7 +57,7 @@ Python標準ライブラリのみ使用。pandoc等は不要です。
 | ファイル | 案 |
 |---|---|
 | `cover/nanatsu-no-kanmon-goals.jpg` | 七つのゴールが奥へ小さくなり、くぐるボールが100人から8人に |
-| `cover/nanatsu-no-kanmon-spill.jpg` | タッチラインの外へこぼれ出たボール。誰も数えない |
+| `cover/nanatsu-no-kanmon-onepanel.jpg` | 黒地に巨大なボール。黒い面がひとつだけオレンジ |
 | `cover/nanatsu-no-kanmon-sheet.jpg` | ピッチ図つきの観察票。本書の道具を表紙にした |
 
 ```bash

@@ -5,9 +5,11 @@
 ゴール・ボール・ピッチのどれかにしてある。
 
 - goals : 「七つの関門」を、奥へ小さくなる7つのゴールとボールの数で
-- spill : 「才能は、こぼれている」を、タッチラインの外へ出るボールで
+- onepanel : 「見落とさない」を、1枚だけ色の違うパネルを持つ巨大なボールで
 - sheet : 「見落とさない仕組み」を、ピッチ図つきの観察票そのもので
 """
+
+CAPTION = "その一人は、いつも同じ場所にいる"
 
 
 def goals(cfg, P, S):
@@ -48,29 +50,16 @@ def goals(cfg, P, S):
     return "".join(out)
 
 
-def spill(cfg, P, S):
-    """タッチラインの外へ出ていくボール。ピッチに残るのは8人だけ。"""
-    FB, W, mix = S["fb"], S["W"], S["mix"]
-    ink, accent = P["ink"], P["accent"]
-    out = [FB.grass(W, 1180, P["bg"], mix(P["bg"], "#000000", .10), bands=9)]
-    line_y = 760
-    out.append(FB.touchline(line_y, color=ink, lw=9, W=W, corner=110))
-    out.append(FB.flag(112, line_y, h=150, color=ink, flagcolor=accent, lw=8))
-    out.append(FB.flag(1488, line_y, h=150, color=ink, flagcolor=accent, lw=8))
-
-    inside = [(300, 300), (520, 240), (760, 320), (980, 250), (1220, 300),
-              (420, 480), (700, 520), (1060, 470), (1330, 520), (250, 620),
-              (900, 640), (1180, 660), (560, 680)]
-    for cx, cy in inside:
-        out.append(FB.ball(cx, cy, 34, light="#FFFFFF", dark="#16161A"))
-    for cx, cy, r, op in [(140, 880, 30, .55), (330, 960, 28, .45),
-                          (760, 1104, 26, .34), (1000, 900, 30, .5),
-                          (1290, 990, 27, .42), (1470, 1080, 25, .32)]:
-        out.append('<g opacity="%.2f">%s</g>'
-                   % (op, FB.ball(cx, cy, r, light="#FFFFFF", dark="#16161A")))
-    out.append('<text x="120" y="1020" fill="%s" font-size="44" '
-               'font-family="NSJP" font-weight="900" opacity=".9">'
-               'ラインの外に出たボールは、誰も数えない</text>' % ink)
+def onepanel(cfg, P, S):
+    """画面いっぱいのボール。黒い面がひとつだけ色違い——見落とされている一人。"""
+    FB, W = S["fb"], S["W"]
+    cx, cy, r = 800, 520, 486
+    out = ['<circle cx="%d" cy="%d" r="%d" fill="%s" opacity=".4"/>'
+           % (cx + 24, cy + 28, r, S["mix"](P["bg"], "#000000", .45))]
+    out.append(FB.ball_detail(cx, cy, r, mark=3, mark_color=P["accent"]))
+    out.append('<text x="%d" y="1120" fill="%s" font-size="44" '
+               'font-family="NSJP" font-weight="900" text-anchor="middle" '
+               'opacity=".92">%s</text>' % (W / 2, P["ink"], CAPTION))
     return "".join(out)
 
 
@@ -130,12 +119,12 @@ ARTS = [
      "palette": ("#10233A", "#0A1626", "#FFFFFF", "#F08A24", "#FFFFFF",
                  "#0A1626", "#C0392B", None),
      "svg": goals},
-    {"name": "spill", "text": "lower", "panel": 1180,
+    {"name": "onepanel", "text": "lower", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
-     "glyphs": "ラインの外に出たボールは誰も数えない",
-     "palette": ("#12603E", "#123B6D", "#FFFFFF", "#F2C230", "#F2C230",
-                 "#123B6D", "#C0392B", None),
-     "svg": spill},
+     "glyphs": CAPTION,
+     "palette": ("#0E1116", "#0E1116", "#FFFFFF", "#F08A24", "#F08A24",
+                 "#0E1116", "#C0392B", None),
+     "svg": onepanel},
     {"name": "sheet", "text": "lower", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
      "glyphs": "一枚の観察票" + "".join(ROWS),

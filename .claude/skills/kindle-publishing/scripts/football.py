@@ -12,7 +12,10 @@ import math
 
 
 def ball(cx, cy, r, light="#FFFFFF", dark="#16161A", lw=None):
-    """サッカーボール。中央の五角形と、そこから伸びる縫い目で球に見せる。"""
+    """サッカーボール。小さいときは記号として、大きいときは球として描く。"""
+    # 小さいうちは記号のほうが読める。細かく描くと車輪に見える境目がここ
+    if r >= 110:
+        return ball_detail(cx, cy, r, light=light, dark=dark)
     lw = lw if lw is not None else max(2.0, r * 0.09)
     out = ['<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s" stroke="%s" '
            'stroke-width="%.1f"/>' % (cx, cy, r, light, dark, lw)]
@@ -160,3 +163,105 @@ def shirt(cx, y, w, h, fill="#FFFFFF", stroke="#16161A", lw=6, stripes=None,
                    '%s</text>' % (cx, y + h * 0.68, number_color or stroke,
                                   font or h * 0.42, number))
     return "".join(out)
+
+
+def ball_detail(cx, cy, r, light="#FFFFFF", dark="#16161A", lw=None,
+                mark=None, mark_color="#F08A24"):
+    """大きく寄せたときのボール。中央と縁の五角形＋縫い目で球面に見せる。
+
+    小さく描くなら ball()、画面の主役にするならこちら。
+    mark に 0〜4 を渡すと、縁の五角形を1枚だけ別の色で塗れる。
+    """
+    import math as _m
+    lw = lw if lw is not None else max(3.0, r * 0.035)
+    out = ['<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s" stroke="%s" '
+           'stroke-width="%.1f"/>' % (cx, cy, r, light, dark, lw * 1.6)]
+
+    def poly(px, py, rad, rot, n=5):
+        pts = []
+        for i in range(n):
+            a = _m.radians(rot + i * (360.0 / n))
+            pts.append("%.1f,%.1f" % (px + rad * _m.cos(a), py + rad * _m.sin(a)))
+        return " ".join(pts)
+
+    out.append('<polygon points="%s" fill="%s"/>'
+               % (poly(cx, cy, r * 0.30, -90), dark))
+    # 縁の五角形は 0.94r 以内に収める。はみ出すと輪郭が歯車のように欠ける
+    for i in range(5):
+        a = _m.radians(-90 + 36 + i * 72)
+        px, py = cx + r * 0.71 * _m.cos(a), cy + r * 0.71 * _m.sin(a)
+        out.append('<polygon points="%s" fill="%s"/>'
+                   % (poly(px, py, r * 0.21, _m.degrees(a) + 180),
+                      mark_color if mark == i else dark))
+    for i in range(5):                               # 縫い目
+        a = _m.radians(-90 + i * 72)
+        x1, y1 = cx + r * 0.30 * _m.cos(a), cy + r * 0.30 * _m.sin(a)
+        x2, y2 = cx + r * 0.99 * _m.cos(a), cy + r * 0.99 * _m.sin(a)
+        out.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" '
+                   'stroke-width="%.1f" stroke-linecap="round"/>'
+                   % (x1, y1, x2, y2, dark, lw))
+    return "".join(out)
+
+
+def crack(cx, cy, r, color="#FFFFFF", lw=10, seed=3):
+    """ひび。「壊れる」を一目で見せる。ボールの上に重ねて使う。"""
+    import math as _m
+    pts, x, y = [], cx - r * 0.92, cy - r * 0.35
+    pts.append((x, y))
+    for i in range(7):
+        x += r * 0.26
+        y += r * (0.22 if i % 2 == 0 else -0.18) * (1 + (i % 3) * .2)
+        pts.append((x, y))
+    d = "M%.1f %.1f " % pts[0] + " ".join("L%.1f %.1f" % p for p in pts[1:])
+    branch = ('M%.1f %.1f L%.1f %.1f'
+              % (pts[3][0], pts[3][1], pts[3][0] + r * 0.10, pts[3][1] + r * 0.55))
+    return ('<path d="%s" fill="none" stroke="%s" stroke-width="%.1f" '
+            'stroke-linejoin="round" stroke-linecap="round"/>'
+            '<path d="%s" fill="none" stroke="%s" stroke-width="%.1f" '
+            'stroke-linecap="round"/>' % (d, color, lw, branch, color, lw * .7))
+
+
+def net_field(W, H, step=64, color="#FFFFFF", opacity=".35", lw=3, skew=26,
+              horizontals=True):
+    """画面いっぱいのネット。ゴール裏から見た視界。
+
+    skew を step と同じにして horizontals=False にすると、45度の菱形の網になる。
+    """
+    out = ['<g stroke="%s" stroke-width="%.1f" opacity="%s">' % (color, lw, opacity)]
+    x = -H
+    while x < W + H:
+        out.append('<line x1="%.0f" y1="0" x2="%.0f" y2="%d"/>'
+                   % (x, x + skew, H))
+        out.append('<line x1="%.0f" y1="0" x2="%.0f" y2="%d"/>'
+                   % (x, x - skew, H))
+        x += step
+    y = 0
+    while horizontals and y < H:
+        out.append('<line x1="0" y1="%.0f" x2="%d" y2="%.0f"/>' % (y, W, y))
+        y += step
+    out.append("</g>")
+    return out and "".join(out)
+
+
+def impact(cx, cy, r, color="#FFFFFF", lw=6, rays=12, arc=(0, 360)):
+    """当たった瞬間の衝撃線。arc を絞ると、押し込まれた側だけに出せる。"""
+    import math as _m
+    out = []
+    a0, a1 = arc
+    for i in range(rays):
+        a = _m.radians(a0 + (a1 - a0) * i / float(max(rays - 1, 1)))
+        x1, y1 = cx + r * 1.12 * _m.cos(a), cy + r * 1.12 * _m.sin(a)
+        x2, y2 = cx + r * (1.34 + (i % 3) * .12) * _m.cos(a), \
+            cy + r * (1.34 + (i % 3) * .12) * _m.sin(a)
+        out.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="%s" '
+                   'stroke-width="%.1f" stroke-linecap="round" opacity=".85"/>'
+                   % (x1, y1, x2, y2, color, lw))
+    return "".join(out)
+
+
+def split_diagonal(W, H, top_color, bottom_color, y_left, y_right):
+    """画面を斜めに二分する色面。ポスターの強さはここから出る。"""
+    return ('<polygon points="0,0 %d,0 %d,%d 0,%d" fill="%s"/>'
+            '<polygon points="0,%d %d,%d %d,%d 0,%d" fill="%s"/>'
+            % (W, W, y_right, y_left, top_color,
+               y_left, W, y_right, W, H, H, bottom_color))
