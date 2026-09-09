@@ -51,21 +51,21 @@ Python標準ライブラリのみ使用。pandoc等は不要です。
 ## 表紙
 
 `cover/` に3案あります（1600×2560px・JPEG、KDPにそのまま入稿可）。
-**色違いではなく、構図から違う3案**です。
+**9つのレイアウトから、本ごとに違う3案**が自動で選ばれます（絵・図・文字から1つずつ）。別の3案が見たいときは `--seed 2` を付けて再実行します。
 
 | ファイル | 案 |
 |---|---|
-| `cover/nanatsu-no-kanmon-pitch.jpg` | 芝の緑にゴール前の白線。下半分の濃緑面に文字 |
-| `cover/nanatsu-no-kanmon-board.jpg` | 戦術ボード。七つの関門を100人→8人のチップで図解 |
-| `cover/nanatsu-no-kanmon-typo.jpg` | 図版なし。斜めの帯に煽り、極太タイトル一本勝負 |
+| `cover/nanatsu-no-kanmon-stripe.jpg` | 絵：ユニフォームの縦縞 |
+| `cover/nanatsu-no-kanmon-cycle.jpg` | 図：七つの関門を円環に、中央に100人 |
+| `cover/nanatsu-no-kanmon-number.jpg` | 文字：巨大な「100」を薄く敷く |
 
 ```bash
 python3 ~/.claude/skills/kindle-publishing/scripts/build_cover.py book.json
 ```
 
 文言・色は `book.json` の `cover` で変えられます（title_1 / title_2 / hook /
-copy / badge / diagram_labels / diagram_numbers / layouts）。3案とも下部に帯を
-敷き、発行元をタイトル上に小さく、右下にシリーズバッジを置いています。
+copy / badge / diagram_labels / diagram_numbers / seed）。3案とも下部に帯を
+敷き、発行元をタイトル上に小さく、シリーズバッジを置いています。
 
 ## KDPへの入稿
 

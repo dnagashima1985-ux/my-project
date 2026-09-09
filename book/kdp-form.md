@@ -228,7 +228,7 @@ Amazon.co.jp
 | 項目 | ファイル |
 |---|---|
 | 原稿 | `build/nanatsu-no-kanmon.epub` |
-| 表紙 | `cover/nanatsu-no-kanmon-pitch.jpg`（推奨）／`nanatsu-no-kanmon-pitch.jpg`／`nanatsu-no-kanmon-typo.jpg` |
+| 表紙 | `cover/nanatsu-no-kanmon-*.jpg` の3案から1つ |
 | ISBN | 不要（KDPが無料のASINを割り当てます） |
 | DRM | 任意。実務書なので「はい」で問題ありません |
 

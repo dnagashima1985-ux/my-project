@@ -49,13 +49,13 @@ python3 $S/build_cover.py    book.json
 
 ## 表紙
 
-**色違いではなく、構図から違う3案**です。
+**9つのレイアウトから、本ごとに違う3案**が自動で選ばれます（絵・図・文字から1つずつ）。別の3案が見たいときは `--seed 2` を付けて再実行します。
 
 | ファイル | 案 |
 |---|---|
-| `cover/renrensen-sekkeizu-pitch.jpg` | 芝の緑にゴール前の白線。下半分の濃緑面に文字 |
-| `cover/renrensen-sekkeizu-board.jpg` | 戦術ボード。四つの疲れと戻る速さをチップで図解 |
-| `cover/renrensen-sekkeizu-typo.jpg` | 図版なし。斜めの赤帯に煽り、極太タイトル |
+| `cover/renrensen-sekkeizu-pitch.jpg` | 絵：芝の緑にゴール前の白線 |
+| `cover/renrensen-sekkeizu-formation.jpg` | 図：チームをドットとパス線で |
+| `cover/renrensen-sekkeizu-number.jpg` | 文字：四つの疲れの「4」を薄く敷く |
 
 ## この本が原典に足したもの
 
