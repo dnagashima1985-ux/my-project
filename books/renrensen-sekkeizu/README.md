@@ -29,6 +29,7 @@ books/renrensen-sekkeizu/
 │   ├── 11-shushou.md           終章 選手は機械ではない
 │   └── 12-appendix.md          付録A-D・出典・免責・奥付
 ├── book.json                   全スクリプトが読む唯一の設定
+├── cover_art.py                表紙3案の絵（タイトルから起こしたもの）
 ├── kdp-form.md                 KDP入力シート（画面の項目順）
 ├── kdp-listing.md              内容紹介・キーワード・価格
 ├── build/                      EPUB と結合Markdown（生成物）
@@ -49,13 +50,16 @@ python3 $S/build_cover.py    book.json
 
 ## 表紙
 
-**9つのレイアウトから、本ごとに違う3案**が自動で選ばれます（絵・図・文字から1つずつ）。別の3案が見たいときは `--seed 2` を付けて再実行します。
+`cover/` に3案あります（1600×2560px・JPEG、KDPにそのまま入稿可）。
+**タイトルから起こした描き下ろし**です。絵の定義は `cover_art.py`。
 
 | ファイル | 案 |
 |---|---|
-| `cover/renrensen-sekkeizu-pitch.jpg` | 絵：芝の緑にゴール前の白線 |
-| `cover/renrensen-sekkeizu-formation.jpg` | 図：チームをドットとパス線で |
-| `cover/renrensen-sekkeizu-number.jpg` | 文字：四つの疲れの「4」を薄く敷く |
+| `cover/renrensen-sekkeizu-blueprint.jpg` | 青焼きの週。7日の柱、MD表記、48時間の寸法線 |
+| `cover/renrensen-sekkeizu-congestion.jpg` | ふだんの週と大会の週。間隔が詰まっていく |
+| `cover/renrensen-sekkeizu-curves.jpg` | 四つの疲れが、別々の速さで戻っていく曲線 |
+
+文言・色は `book.json` の `cover`、絵は `cover_art.py` で変えられます。
 
 ## この本が原典に足したもの
 

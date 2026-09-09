@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
-"""Render three cover candidates at 1600x2560 — different ones for every book.
+"""Render three cover candidates at 1600x2560.
 
 Usage:  python3 build_cover.py [book.json] [--seed N]
 
-Nine compositions live here, in three families. Each book gets one from each
-family, so the three candidates never rhyme with each other:
+**The covers for a book should be drawn for that book.** Put a `cover_art.py`
+next to book.json defining ARTS — three pictures conceived from this title —
+and they become the three candidates. That file is where the design lives;
+this one is the press. See "Bespoke art" below for the contract, and
+references/house-style.md for how to arrive at three ideas.
+
+Without a cover_art.py the nine stock compositions here stand in. They are a
+safety net, not the plan: a shelf of books wearing them starts to look like a
+shelf of one book. They live in three families, and a book gets one from each:
 
   絵 scene   pitch  grass and the goal-area markings
              night  floodlights over a dark stand
@@ -20,6 +27,27 @@ Which three a book gets is decided by its slug, so a rebuild is stable but
 the next book looks nothing like this one. `--seed 2` (or "seed" in
 book.json's cover block) rerolls when the author wants another set. Palettes
 are picked the same way, so even a repeated layout arrives in new colours.
+
+Bespoke art — cover_art.py beside book.json:
+
+    ARTS = [
+      {"name": "blueprint",              # becomes cover/<slug>-blueprint.jpg
+       "text": "lower",                  # which text block: lower/ribbon/centre
+       "panel": 1180,                    # y where the type panel starts, or None
+       "badge": (1300, 2072, 148),       # cx, cy, r of the series seal
+       "obi_y": 2300,
+       "palette": ("#0E2E5A", "#08203F", "#FFFFFF", "#F2A33A", "#FFFFFF",
+                   "#08203F", "#C0392B", None),   # bg paper ink accent
+                                                  # obi_bg obi_fg badge border
+       "svg": lambda cfg, P, S: "<svg fragment>"},
+      ...
+    ]
+
+The svg callable gets the cover config, the resolved palette, and S — a dict
+of helpers from this module (W, H, mix, art, rgb). Draw into the art area
+above the panel; the furniture (byline, title, hook, badge, obi, border) is
+added afterwards. Bespoke art is SVG, so it needs the browser: with Pillow
+only, the stock layouts are drawn instead and the run says so.
 
 What every cover shares comes from what sells on a phone: one dominant word,
 three colours, a single emphasis, an obi across the foot, and a hairline
@@ -304,6 +332,33 @@ def palette(name, idx):
             "border")
     pals = LAYOUTS[name]["palettes"]
     return dict(zip(keys, pals[idx % len(pals)]))
+
+
+def load_custom(root):
+    """ARTS from cover_art.py beside book.json, registered as layouts."""
+    path = os.path.join(root, "cover_art.py")
+    if not os.path.exists(path):
+        return []
+    ns = {}
+    exec(compile(io_read(path), path, "exec"), ns)
+    arts = ns.get("ARTS") or []
+    names = []
+    for a in arts:
+        name = a["name"]
+        LAYOUTS[name] = {
+            "family": a.get("family", "custom"), "art": "custom:" + name,
+            "text": a.get("text", "lower"), "panel": a.get("panel", 1180),
+            "badge": a.get("badge", (1300, 2072, 148)),
+            "obi_y": a.get("obi_y", 2300), "t2": a.get("t2", "ink"),
+            "palettes": [a["palette"]], "svg": a["svg"],
+        }
+        names.append((name, 0))
+    return names
+
+
+def io_read(path):
+    with open(path, encoding="utf-8") as f:
+        return f.read()
 
 
 def pick_layouts(cfg, seed):
@@ -603,10 +658,17 @@ def html_obi(cfg, L, P):
                    'white-space:nowrap">%s</div>' % (y + 88, P["obi_fg"], line))
 
 
+SHARE = {"W": W, "H": H, "mix": mix, "art": art, "rgb": rgb,
+         "contrast": contrast}
+
+
 def render_html(cfg, name, idx, fonts, out_dir, chrome, stem):
     L, P = LAYOUTS[name], palette(name, idx)
     P["_t2"] = L.get("t2", "ink")
-    art = ART_SVG[L["art"]](cfg, P)
+    if L["art"].startswith("custom:"):
+        artwork = L["svg"](cfg, P, SHARE)
+    else:
+        artwork = ART_SVG[L["art"]](cfg, P)
     panel = ""
     if L["panel"]:
         panel = ('<div style="position:absolute;left:0;top:%dpx;width:%dpx;'
@@ -626,7 +688,7 @@ def render_html(cfg, name, idx, fonts, out_dir, chrome, stem):
                   '</div>' % P["border"])
     body = ('<div class="page"><svg class="art" width="%d" height="%d">%s</svg>'
             '%s%s%s%s%s%s</div>'
-            % (W, H, art, panel, ribbon_text, html_text(cfg, L, P),
+            % (W, H, artwork, panel, ribbon_text, html_text(cfg, L, P),
                html_badge(cfg, L, P), html_obi(cfg, L, P), border))
     # .page must be sized explicitly: with inset:0 it inherits the viewport,
     # which headless Chromium can make shorter than the page, and overflow
@@ -882,9 +944,14 @@ def main(argv):
     if seed is None:
         seed = cover.get("seed", 1)
 
+    custom = load_custom(root)
     explicit = cover.get("layouts")
-    chosen = ([(n, 0) if isinstance(n, str) else tuple(n) for n in explicit]
-              if explicit else pick_layouts(cover, seed))
+    if explicit:
+        chosen = [(n, 0) if isinstance(n, str) else tuple(n) for n in explicit]
+    elif custom:
+        chosen = custom
+    else:
+        chosen = pick_layouts(cover, seed)
 
     out_dir = os.path.join(root, "cover")
     cache = os.path.join(out_dir, ".fonts")
@@ -897,8 +964,14 @@ def main(argv):
     if use_pil and not forced:
         print("  Chromium not found — drawing with Pillow")
 
+    if use_pil and any(LAYOUTS[n]["art"].startswith("custom:")
+                       for n, _ in chosen if n in LAYOUTS):
+        print("  ! cover_art.py needs the browser — drawing the stock layouts")
+        chosen = pick_layouts(cover, seed)
+        custom = []
+
     fonts = pil_fonts(cover, cache) if use_pil else fonts_css(cover, cache)
-    print("covers (seed %s):" % seed)
+    print("covers%s:" % ("" if custom else " (seed %s)" % seed))
     for name, idx in chosen:
         if name not in LAYOUTS:
             print("  ! unknown layout %r — skipped" % name)
@@ -908,8 +981,11 @@ def main(argv):
             render_pil(cover, name, idx, fonts, out_dir, stem)
         else:
             render_html(cover, name, idx, fonts, out_dir, chrome, stem)
-    if not explicit:
-        print("  別の3案が見たいときは --seed 2 （book.json の cover.seed でも可）")
+    if custom and not explicit:
+        print("  cover_art.py の3案。描き直すときはこのファイルを編集する")
+    elif not explicit:
+        print("  ! この本には cover_art.py がない——既製レイアウトで代用中。")
+        print("    別の3案なら --seed 2。本来はタイトルから描き起こす")
 
 
 if __name__ == "__main__":

@@ -28,6 +28,7 @@ book/
 │   └── 12-appendix.md          付録A-C・出典・免責
 ├── kdp-form.md                 KDP入力シート（画面の項目順に貼る値）
 ├── kdp-listing.md              KDP出品用テキスト（内容紹介・キーワード・価格）
+├── cover_art.py                表紙3案の絵（タイトルから起こしたもの）
 ├── build_epub.py               EPUB3ビルドスクリプト（依存パッケージなし）
 └── build/
     ├── nanatsu-no-kanmon.epub   KDPに直接アップロードできるEPUB
@@ -51,21 +52,20 @@ Python標準ライブラリのみ使用。pandoc等は不要です。
 ## 表紙
 
 `cover/` に3案あります（1600×2560px・JPEG、KDPにそのまま入稿可）。
-**9つのレイアウトから、本ごとに違う3案**が自動で選ばれます（絵・図・文字から1つずつ）。別の3案が見たいときは `--seed 2` を付けて再実行します。
+**タイトルから起こした描き下ろし**です。絵の定義は `cover_art.py`。
 
 | ファイル | 案 |
 |---|---|
-| `cover/nanatsu-no-kanmon-stripe.jpg` | 絵：ユニフォームの縦縞 |
-| `cover/nanatsu-no-kanmon-cycle.jpg` | 図：七つの関門を円環に、中央に100人 |
-| `cover/nanatsu-no-kanmon-number.jpg` | 文字：巨大な「100」を薄く敷く |
+| `cover/nanatsu-no-kanmon-gates.jpg` | 七つの門。くぐるたびに開口が狭まり、100人が8人になる |
+| `cover/nanatsu-no-kanmon-spill.jpg` | 漏斗。壁の外へこぼれ落ちる点と、通り抜けた8人 |
+| `cover/nanatsu-no-kanmon-sheet.jpg` | 一枚の観察票そのもの。本書の道具を表紙にした |
 
 ```bash
 python3 ~/.claude/skills/kindle-publishing/scripts/build_cover.py book.json
 ```
 
-文言・色は `book.json` の `cover` で変えられます（title_1 / title_2 / hook /
-copy / badge / diagram_labels / diagram_numbers / seed）。3案とも下部に帯を
-敷き、発行元をタイトル上に小さく、シリーズバッジを置いています。
+文言・色は `book.json` の `cover`、絵は `cover_art.py` で変えられます。
+3案とも下部に帯を敷き、発行元をタイトル上に小さく、シリーズバッジを置いています。
 
 ## KDPへの入稿
 

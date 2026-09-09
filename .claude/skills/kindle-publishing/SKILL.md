@@ -172,15 +172,28 @@ python3 <skill>/scripts/build_cover.py    book.json
   他言語混入、章をまたぐ数値、章別文字数。人間の目が最も滑る種類の誤りを拾う
 - **build_epub.py** — `build/<slug>.epub`（KDPに直接入稿可）と結合Markdown。
   タイトルページ・目次・`dc:publisher` 入り。標準ライブラリのみ
-- **build_cover.py** — `cover/<slug>-<layout>.jpg` を1600×2560で3案。
-  レイアウトは9つあり、**「絵」「図」「文字」の3系統から1つずつ**自動で選ぶ。
-  選択は本のスラッグで決まるので、**本ごとに違う3案**が出て、同じ本なら
-  何度でも同じものが出る。別の3案が見たいときは `--seed 2`。どの案も下部に
-  帯を敷く——ここが自費出版に見えるかどうかの分かれ目。和文フォントは実際に
-  使う文字だけをGoogle Fontsから取るので、どんなタイトルでも化けない。
-  ブラウザが無い環境ではPillowで同じ図版を描く（`COVER_RENDERER=pillow`）
+- **build_cover.py** — `cover/<slug>-<名前>.jpg` を1600×2560で3案。
+  **表紙はタイトルから描き起こす**（下記）。どの案も下部に帯を敷く——ここが
+  自費出版に見えるかどうかの分かれ目。和文フォントは実際に使う文字だけを
+  Google Fontsから取るので、どんなタイトルでも化けない
 
 いずれも `book.json` のあるディレクトリで実行する。
+
+### 5.5. 表紙を、タイトルから描く ← ここも勝負
+
+**既製のレイアウトを当てはめない。**タイトル・副題・煽りを絵になる言葉に
+分解し、性格の違う3案を `cover_art.py` に描く。book.json の隣に置けば、
+`build_cover.py` がそれを3案として使う。契約は `scripts/build_cover.py`
+冒頭の "Bespoke art"、考え方は `references/house-style.md`。
+
+**全部サッカーの本である。**ピッチ、ゴール、ボール、ユニフォーム、配置図、
+ホワイトボード、記録用紙——ジャンルの記号を避ける理由はない。
+
+描いたら**必ず画像を開いて見る**こと。重なり・はみ出し・余白の抜けは
+コードからは分からない。2〜3回描き直す前提で時間を取る。
+
+`cover_art.py` が無いときは既製の9レイアウトで代用するが、それは保険。
+ビルドの最後に警告が出る。
 
 ### 6. KDPの書類を作る
 
@@ -248,6 +261,7 @@ python3 <skill>/scripts/build_cover.py    book.json
 ```
 <作業ディレクトリ>/          new_book.py がこの形を作る
 ├── book.json
+├── cover_art.py    この本の表紙3案（タイトルから起こした絵）
 ├── notes/          証拠カード（evidence.md）。原稿の裏づけ
 ├── src/            章ごとのMarkdown
 ├── build/          EPUB と結合Markdown（生成物）
@@ -257,7 +271,7 @@ python3 <skill>/scripts/build_cover.py    book.json
 ```
 
 生成物（`build/` `cover/`）はgitに入れるかどうかを本人に聞く。原稿と
-`book.json`、そして `notes/evidence.md` は必ず残す——原稿と book.json があれば
+`book.json`、`cover_art.py`、そして `notes/evidence.md` は必ず残す——原稿と book.json があれば
 全部作り直せるし、証拠カードがあれば「この数字はどこから来たか」に後から答えられる。
 
 ## つまずきやすいところ
