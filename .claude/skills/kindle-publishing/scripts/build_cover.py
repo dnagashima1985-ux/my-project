@@ -117,8 +117,11 @@ def fetch_font(family, weight, chars, cache_dir, fmt="woff2"):
         return None
 
 
+EXTRA_GLYPHS = []
+
+
 def glyphs(cfg):
-    chars = "".join([cfg["title_1"], cfg["title_2"], cfg.get("subtitle", ""),
+    chars = "".join(EXTRA_GLYPHS + [cfg["title_1"], cfg["title_2"], cfg.get("subtitle", ""),
                      cfg.get("publisher", ""), cfg.get("hook", ""),
                      "".join(cfg.get("copy", [])), "".join(cfg.get("badge", [])),
                      "".join(cfg.get("diagram_labels", [])),
@@ -334,17 +337,31 @@ def palette(name, idx):
     return dict(zip(keys, pals[idx % len(pals)]))
 
 
+def football_kit():
+    """The SVG football parts every book's art can draw from."""
+    import importlib.util
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "football.py")
+    spec = importlib.util.spec_from_file_location("football", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+FB = football_kit()
+
+
 def load_custom(root):
     """ARTS from cover_art.py beside book.json, registered as layouts."""
     path = os.path.join(root, "cover_art.py")
     if not os.path.exists(path):
         return []
-    ns = {}
+    ns = {"FB": FB}
     exec(compile(io_read(path), path, "exec"), ns)
     arts = ns.get("ARTS") or []
     names = []
     for a in arts:
         name = a["name"]
+        EXTRA_GLYPHS.append(a.get("glyphs", ""))
         LAYOUTS[name] = {
             "family": a.get("family", "custom"), "art": "custom:" + name,
             "text": a.get("text", "lower"), "panel": a.get("panel", 1180),
@@ -659,7 +676,7 @@ def html_obi(cfg, L, P):
 
 
 SHARE = {"W": W, "H": H, "mix": mix, "art": art, "rgb": rgb,
-         "contrast": contrast}
+         "contrast": contrast, "fb": FB}
 
 
 def render_html(cfg, name, idx, fonts, out_dir, chrome, stem):
@@ -944,7 +961,7 @@ def main(argv):
     if seed is None:
         seed = cover.get("seed", 1)
 
-    custom = load_custom(root)
+    custom = load_custom(root)      # 先に読む——絵が使う文字も字形に含めるため
     explicit = cover.get("layouts")
     if explicit:
         chosen = [(n, 0) if isinstance(n, str) else tuple(n) for n in explicit]

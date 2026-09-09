@@ -55,9 +55,9 @@ python3 $S/build_cover.py    book.json
 
 | ファイル | 案 |
 |---|---|
-| `cover/renrensen-sekkeizu-blueprint.jpg` | 青焼きの週。7日の柱、MD表記、48時間の寸法線 |
-| `cover/renrensen-sekkeizu-congestion.jpg` | ふだんの週と大会の週。間隔が詰まっていく |
-| `cover/renrensen-sekkeizu-curves.jpg` | 四つの疲れが、別々の速さで戻っていく曲線 |
+| `cover/renrensen-sekkeizu-matchweek.jpg` | ゴール前の芝に、月曜から日曜までのボールが7つ。土曜が試合 |
+| `cover/renrensen-sekkeizu-congestion.jpg` | ふだんの週と大会の週。試合＝ボールの間隔が詰まっていく |
+| `cover/renrensen-sekkeizu-kits.jpg` | 4枚のユニフォーム。背番号は、その疲れが戻るまでの時間 |
 
 文言・色は `book.json` の `cover`、絵は `cover_art.py` で変えられます。
 

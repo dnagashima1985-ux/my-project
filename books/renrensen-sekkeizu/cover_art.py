@@ -1,167 +1,133 @@
 # -*- coding: utf-8 -*-
 """『連戦で壊れない週の設計図』の表紙——タイトルから起こした3案。
 
-- blueprint : 「週の設計図」を、そのまま青焼きの図面にする
-- congestion: 「連戦」を、間隔が詰まっていく試合の並びで見せる
-- curves    : 「疲れは、一種類ではない」を、戻り方の違う4本の線で見せる
+サムネイルで「サッカーの本」と分かることを優先し、絵の主役は必ず
+ピッチ・ゴール・ボール・ユニフォームのどれかにしてある。
 
-build_cover.py が ARTS を読んで、この3案を表紙にする。
+- matchweek : 「週の設計図」を、ゴール前の芝に並べた7つのボールで
+- congestion: 「連戦」を、詰まっていく試合＝ボールの並びで
+- kits      : 「疲れは、一種類ではない」を、4枚のユニフォームの背番号で
 """
 
 
-def blueprint(cfg, P, S):
-    W, mix = S["W"], S["mix"]
+def matchweek(cfg, P, S):
+    """ゴール前の芝に、月曜から日曜までのボールが7つ並ぶ。土曜が試合。"""
+    FB, W = S["fb"], S["W"]
     ink, accent = P["ink"], P["accent"]
-    out = []
-    for x in range(0, W, 80):                       # 方眼
-        out.append('<line x1="%d" y1="0" x2="%d" y2="1180" stroke="%s" '
-                   'stroke-width="2" opacity=".10"/>' % (x, x, ink))
-    for y in range(0, 1180, 80):
-        out.append('<line x1="0" y1="%d" x2="%d" y2="%d" stroke="%s" '
-                   'stroke-width="2" opacity=".10"/>' % (y, W, y, ink))
+    out = [FB.grass(W, 1180, P["bg"], S["mix"](P["bg"], "#000000", .10), bands=10)]
+    out.append(FB.goal(800, 96, 700, 250, color=ink, lw=14, net=30))
+    out.append(FB.penalty_area(800, 346, w=1300, h=280, color=ink, lw=8,
+                               spot=False))
 
     days = ["月", "火", "水", "木", "金", "土", "日"]
     md = ["MD-5", "MD-4", "MD-3", "MD-2", "MD-1", "MD", "OFF"]
-    # 練習日は白の面、試合日だけアクセント。オレンジを薄く敷くと濁る
-    load = [0, .16, 0, .16, .07, "match", 0]        # 土曜が試合
-    left, colw, gap = 150, 172, 15
+    left, gap, y = 168, 212, 820
     for i, day in enumerate(days):
-        x = left + i * (colw + gap)
-        if load[i] == "match":
-            fill = 'fill="%s"' % accent
-        elif load[i]:
-            fill = 'fill="%s" fill-opacity="%.2f"' % (ink, load[i])
-        else:
-            fill = 'fill="none"'
-        out.append('<rect x="%d" y="360" width="%d" height="360" %s '
-                   'stroke="%s" stroke-width="3"/>' % (x, colw, fill, ink))
-        out.append('<text x="%d" y="322" fill="%s" font-size="46" '
-                   'font-family="NSJP" font-weight="700" text-anchor="middle">'
-                   '%s</text>' % (x + colw / 2, ink, day))
-        out.append('<text x="%d" y="768" fill="%s" font-size="26" '
-                   'font-family="NSJP" font-weight="400" text-anchor="middle" '
-                   'opacity=".72">%s</text>' % (x + colw / 2, ink, md[i]))
-
-    # 寸法線：木（MD-2）から土（MD）まで48時間
-    x1 = left + 3 * (colw + gap) + colw / 2
-    x2 = left + 5 * (colw + gap) + colw / 2
-    out.append('<g stroke="%s" stroke-width="3">' % accent)
-    out.append('<line x1="%.0f" y1="856" x2="%.0f" y2="856"/>' % (x1, x2))
+        cx = left + i * gap
+        match = i == 5
+        r = 62 if match else 44
+        if match:
+            out.append('<circle cx="%d" cy="%d" r="%d" fill="none" stroke="%s" '
+                       'stroke-width="9"/>' % (cx, y, r + 26, accent))
+        out.append(FB.ball(cx, y, r, light="#FFFFFF" if match else "#EFEFEA",
+                           dark="#16161A"))
+        out.append('<text x="%d" y="%d" fill="%s" font-size="46" '
+                   'font-family="NSJP" font-weight="900" text-anchor="middle">'
+                   '%s</text>' % (cx, y - 108, ink, day))
+        out.append('<text x="%d" y="%d" fill="%s" font-size="28" '
+                   'font-family="NSJP" font-weight="700" text-anchor="middle" '
+                   'opacity=".8">%s</text>'
+                   % (cx, y + 118, accent if match else ink, md[i]))
+    x1, x2 = left + 3 * gap, left + 5 * gap
+    out.append('<g stroke="%s" stroke-width="5">' % accent)
+    out.append('<line x1="%d" y1="1046" x2="%d" y2="1046"/>' % (x1, x2))
     for x in (x1, x2):
-        out.append('<line x1="%.0f" y1="828" x2="%.0f" y2="884"/>' % (x, x))
+        out.append('<line x1="%d" y1="1022" x2="%d" y2="1070"/>' % (x, x))
     out.append("</g>")
-    out.append('<text x="%.0f" y="838" fill="%s" font-size="40" '
+    out.append('<text x="%d" y="1122" fill="%s" font-size="44" '
                'font-family="NSJP" font-weight="900" text-anchor="middle">'
                '48時間</text>' % ((x1 + x2) / 2, accent))
-
-    # 図面の表題欄
-    out.append('<rect x="1096" y="112" width="364" height="132" fill="none" '
-               'stroke="%s" stroke-width="3" opacity=".8"/>' % ink)
-    out.append('<line x1="1096" y1="180" x2="1460" y2="180" stroke="%s" '
-               'stroke-width="2" opacity=".8"/>' % ink)
-    out.append('<text x="1116" y="162" fill="%s" font-size="30" '
-               'font-family="NSJP" font-weight="700">WEEK PLAN</text>' % ink)
-    out.append('<text x="1116" y="222" fill="%s" font-size="26" '
-               'font-family="NSJP" opacity=".72">SCALE 1 WEEK</text>' % ink)
     return "".join(out)
 
 
 def congestion(cfg, P, S):
-    """ふだんの週と、連戦の週を上下に並べる。間隔が詰まっていくのが主役。"""
-    art = S["art"]
-    ink, accent = art(P, .9), P["accent"]
-    faint = art(P, .35)
-    base, span = 210, 1230
+    """タッチラインを時間軸に。ふだんの週の上に、大会の週を重ねて見せる。"""
+    FB, W = S["fb"], S["W"]
+    ink, accent = P["ink"], P["accent"]
+    out = [FB.grass(W, 1180, P["bg"], S["mix"](P["bg"], "#000000", .10), bands=10)]
+    base, span = 190, 1230
 
     def row(y, matches, label, hot_from=None):
-        # 行の名前は、間隔ラベル（y-96）よりさらに上に置く。同じ高さだと重なる
-        out = ['<text x="%d" y="%d" fill="%s" font-size="46" font-family="NSJP" '
-               'font-weight="900">%s</text>' % (base - 30, y - 178, ink, label)]
-        out.append('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" '
-                   'stroke-width="8"/>' % (base, y, base + span, y, faint))
-        for i in range(15):
-            x = base + span * i / 14.0
-            out.append('<line x1="%.0f" y1="%d" x2="%.0f" y2="%d" stroke="%s" '
-                       'stroke-width="4"/>' % (x, y - 18, x, y + 18, faint))
+        o = ['<text x="%d" y="%d" fill="%s" font-size="46" font-family="NSJP" '
+             'font-weight="900">%s</text>' % (base - 20, y - 150, ink, label)]
+        o.append('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" '
+                 'stroke-width="7" opacity=".8"/>'
+                 % (base, y, base + span, y, ink))
         xs = [base + span * m / 14.0 for m in matches]
         for i, x in enumerate(xs):
             hot = hot_from is not None and i >= hot_from
-            out.append('<circle cx="%.0f" cy="%d" r="44" fill="%s"/>'
-                       % (x, y, accent if hot else ink))
+            if hot:
+                o.append('<circle cx="%.0f" cy="%d" r="60" fill="none" '
+                         'stroke="%s" stroke-width="8"/>' % (x, y, accent))
+            o.append(FB.ball(x, y, 42, light="#FFFFFF", dark="#16161A"))
         for i in range(len(xs) - 1):
             gap = matches[i + 1] - matches[i] - 1
             hot = hot_from is not None and i + 1 >= hot_from
             col = accent if hot else ink
-            mx = (xs[i] + xs[i + 1]) / 2
-            out.append('<line x1="%.0f" y1="%d" x2="%.0f" y2="%d" stroke="%s" '
-                       'stroke-width="4"/>'
-                       % (xs[i] + 54, y - 74, xs[i + 1] - 54, y - 74, col))
-            out.append('<text x="%.0f" y="%d" fill="%s" font-size="42" '
-                       'font-family="NSJP" font-weight="900" '
-                       'text-anchor="middle">中%d日</text>' % (mx, y - 96, col, gap))
-        return "".join(out)
+            o.append('<text x="%.0f" y="%d" fill="%s" font-size="40" '
+                     'font-family="NSJP" font-weight="900" text-anchor="middle">'
+                     '中%d日</text>' % ((xs[i] + xs[i + 1]) / 2, y - 74, col, gap))
+        return "".join(o)
 
-    out = [row(430, [0, 4, 8, 12], "ふだんの週")]
-    out.append(row(900, [0, 4, 7, 9, 11, 12], "大会の週", hot_from=3))
-    out.append('<text x="%d" y="%d" fill="%s" font-size="44" font-family="NSJP" '
-               'font-weight="900" text-anchor="end">ここで壊れる</text>'
-               % (base + span, 1030, accent))
+    out.append(row(400, [0, 4, 8, 12], "ふだんの週"))
+    out.append(row(880, [0, 4, 7, 9, 11, 12], "大会の週", hot_from=3))
+    out.append('<text x="%d" y="1030" fill="%s" font-size="46" '
+               'font-family="NSJP" font-weight="900" text-anchor="end">'
+               'ここで壊れる</text>' % (base + span + 30, accent))
     return "".join(out)
 
 
-def curves(cfg, P, S):
-    W, art = S["W"], S["art"]
-    ink, accent = art(P, .92), P["accent"]
-    faint = art(P, .3)
-    top, base, x0 = 300, 940, 240
-    out = ['<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" '
-           'stroke-width="3" stroke-dasharray="14 12"/>'
-           % (120, base, 1500, base, faint)]
-    out.append('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" '
-               'stroke-width="5"/>' % (x0, top - 40, x0, base + 40, faint))
-    out.append('<text x="%d" y="%d" fill="%s" font-size="38" font-family="NSJP" '
-               'font-weight="700" text-anchor="middle">試合</text>'
-               % (x0, top - 66, ink))
-
-    rows = [("頭", "半日〜1日", 560, .55), ("神経", "24〜48時間", 800, .70),
-            ("筋", "48〜72時間", 1080, .85), ("心", "数日〜数週", 1420, 1.0)]
-    for name, when, end, weight in rows:
-        col = accent if name == "心" else ink
-        w = 9 if name == "心" else 7
-        op = 1.0 if name == "心" else .45 + weight * .35
-        out.append('<path d="M%d %d C%.0f %d %.0f %d %d %d" fill="none" '
-                   'stroke="%s" stroke-width="%d" opacity="%.2f"/>'
-                   % (x0, top, x0 + (end - x0) * .55, top,
-                      x0 + (end - x0) * .55, base, end, base, col, w, op))
-        out.append('<circle cx="%d" cy="%d" r="12" fill="%s" opacity="%.2f"/>'
-                   % (end, base, col, op))
-        out.append('<text x="%d" y="%d" fill="%s" font-size="42" '
-                   'font-family="NSJP" font-weight="900" text-anchor="middle" '
-                   'opacity="%.2f">%s</text>' % (end, base + 66, col, op, name))
-        out.append('<text x="%d" y="%d" fill="%s" font-size="28" '
-                   'font-family="NSJP" font-weight="400" text-anchor="middle" '
-                   'opacity="%.2f">%s</text>'
-                   % (end, base + 112, col, op * .8, when))
-    out.append('<text x="%d" y="%d" fill="%s" font-size="34" font-family="NSJP" '
-               'font-weight="700" opacity=".75">戻るまでの速さ</text>'
-               % (1180, top + 30, ink))
+def kits(cfg, P, S):
+    """4枚のユニフォーム。背番号は、その疲れが戻るまでの時間。"""
+    FB, W = S["fb"], S["W"]
+    ink, accent = P["ink"], P["accent"]
+    out = [FB.grass(W, 1180, P["bg"], S["mix"](P["bg"], "#000000", .09), bands=10)]
+    out.append(FB.touchline(1104, color=ink, lw=7, W=W, corner=88, side="up"))
+    rows = [("筋", "72", "48〜72時間"), ("神経", "48", "24〜48時間"),
+            ("頭", "12", "半日〜1日"), ("心", "∞", "数日〜数週")]
+    cxs = [292, 646, 1000, 1354]   # 袖が触れない間隔
+    for (name, num, when), cx in zip(rows, cxs):
+        hot = name == "心"
+        out.append(FB.shirt(cx, 300, 192, 320,
+                            fill=accent if hot else "#F5F2EC",
+                            stroke="#16161A", lw=7,
+                            number=num, number_color="#16161A", font=118))
+        out.append('<text x="%d" y="%d" fill="%s" font-size="52" '
+                   'font-family="NSJP" font-weight="900" text-anchor="middle">'
+                   '%s</text>' % (cx, 726, ink, name))
+        out.append('<text x="%d" y="%d" fill="%s" font-size="30" '
+                   'font-family="NSJP" font-weight="700" text-anchor="middle" '
+                   'opacity=".82">%s</text>' % (cx, 776, ink, when))
+    out.append('<text x="%d" y="%d" fill="%s" font-size="40" font-family="NSJP" '
+               'font-weight="700" text-anchor="middle" opacity=".9">'
+               '背番号は、戻るまでの時間</text>' % (W / 2, 900, ink))
     return "".join(out)
 
 
 ARTS = [
-    {"name": "blueprint", "text": "lower", "panel": 1180,
+    {"name": "matchweek", "text": "lower", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
-     "palette": ("#0E2E5A", "#0A2145", "#FFFFFF", "#F2A33A", "#FFFFFF",
-                 "#0A2145", "#C0392B", None),
-     "svg": blueprint},
+     "palette": ("#146B45", "#0B3A26", "#FFFFFF", "#F2A33A", "#FFFFFF",
+                 "#0B3A26", "#C0392B", None),
+     "svg": matchweek},
     {"name": "congestion", "text": "lower", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
-     "palette": ("#F5F2EC", "#16161A", "#FFFFFF", "#C0392B", "#C0392B",
-                 "#FFFFFF", "#16161A", "#DCD6C8"),
+     "palette": ("#0F5233", "#101418", "#FFFFFF", "#F2C230", "#F2C230",
+                 "#101418", "#C0392B", None),
      "svg": congestion},
-    {"name": "curves", "text": "lower", "panel": 1180,
+    {"name": "kits", "text": "lower", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
-     "palette": ("#101820", "#0A1017", "#FFFFFF", "#F2A33A", "#F2A33A",
-                 "#0A1017", "#1B5FA8", None),
-     "svg": curves},
+     "palette": ("#12603E", "#123B6D", "#FFFFFF", "#F08A24", "#FFFFFF",
+                 "#123B6D", "#C0392B", None),
+     "glyphs": "∞背号戻時間", "svg": kits},
 ]

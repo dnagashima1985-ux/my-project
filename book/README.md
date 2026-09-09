@@ -56,9 +56,9 @@ Python標準ライブラリのみ使用。pandoc等は不要です。
 
 | ファイル | 案 |
 |---|---|
-| `cover/nanatsu-no-kanmon-gates.jpg` | 七つの門。くぐるたびに開口が狭まり、100人が8人になる |
-| `cover/nanatsu-no-kanmon-spill.jpg` | 漏斗。壁の外へこぼれ落ちる点と、通り抜けた8人 |
-| `cover/nanatsu-no-kanmon-sheet.jpg` | 一枚の観察票そのもの。本書の道具を表紙にした |
+| `cover/nanatsu-no-kanmon-goals.jpg` | 七つのゴールが奥へ小さくなり、くぐるボールが100人から8人に |
+| `cover/nanatsu-no-kanmon-spill.jpg` | タッチラインの外へこぼれ出たボール。誰も数えない |
+| `cover/nanatsu-no-kanmon-sheet.jpg` | ピッチ図つきの観察票。本書の道具を表紙にした |
 
 ```bash
 python3 ~/.claude/skills/kindle-publishing/scripts/build_cover.py book.json
