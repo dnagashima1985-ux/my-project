@@ -210,8 +210,11 @@ def art_funnel(cfg, dark):
     bar = cfg.get("diagram_color", "#123B6D")
     accent = cfg.get("accent", "#F08A24")
     left, right, top = 150, 1450, 300
-    gap = min(120, int(920 / max(len(labels), 1)))
-    inset_step = int(540 / max(len(labels) - 1, 1))
+    # Few labels leave the art area half empty and the bars too narrow for
+    # their text, so both the row spacing and how fast the funnel closes are
+    # tunable per book. The defaults reproduce the original proportions.
+    gap = min(int(cfg.get("diagram_gap", 120)), int(920 / max(len(labels), 1)))
+    inset_step = int(cfg.get("diagram_inset", 540) / max(len(labels) - 1, 1))
     out = []
     for i, lab in enumerate(labels):
         y = top + i * gap
@@ -366,8 +369,8 @@ def render_pil(cfg, layout, fonts, out_dir):
         labels = cfg["diagram_labels"]
         bar = rgb(cfg.get("diagram_color", "#123B6D"))
         left, right, top = 150, 1450, 300
-        gap = min(120, int(920 / max(len(labels), 1)))
-        inset_step = int(540 / max(len(labels) - 1, 1))
+        gap = min(int(cfg.get("diagram_gap", 120)), int(920 / max(len(labels), 1)))
+        inset_step = int(cfg.get("diagram_inset", 540) / max(len(labels) - 1, 1))
         for i, lab in enumerate(labels):
             y = top + i * gap
             inset = i * inset_step
