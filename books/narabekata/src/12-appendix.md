@@ -215,9 +215,9 @@ Barça Innovation Hub「Training models in modern football: from traditional app
 
 # 奥付
 
-**連戦で壊れない週の設計図**
+**サッカー練習の並べ方**
 
-戦術的ピリオダイゼーションと負荷管理の実務
+四つの疲れで組む一週間の設計
 
 著　フットボールパラダイム
 

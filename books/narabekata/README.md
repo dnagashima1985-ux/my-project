@@ -1,10 +1,10 @@
-# 連戦で壊れない週の設計図 — 原稿一式
+# サッカー練習の並べ方 — 原稿一式
 
-副題：戦術的ピリオダイゼーションと負荷管理の実務
+副題：四つの疲れで組む一週間の設計
 著／発行元：フットボールパラダイム
 
-日本の育成現場向けに書き下ろしたオリジナルの実務書です。骨格は独自の
-「四つの疲れ（筋・神経・頭・心）」と、それを一週間に並べる「週の器」。
+日本の育成現場向けに書き下ろしたオリジナルの実務書です。骨格は独自の「四つの疲れ（筋・神経・頭・心）」と、
+それを一週間に並べる「週の器」。
 Barça Innovation Hub の記事「Training models in modern football」と、そこで
 名前が挙がる研究（フラーデ／ブヒャイトら／UEFA傷害調査ほか）は、出典を明記
 したうえで**証拠として引用**しています。
@@ -12,7 +12,7 @@ Barça Innovation Hub の記事「Training models in modern football」と、そ
 ## 構成
 
 ```
-books/renrensen-sekkeizu/
+books/narabekata/
 ├── notes/evidence.md           証拠カード60枚（原稿の裏づけ）
 ├── src/                        章ごとのMarkdown（ここを編集する）
 │   ├── 00-hajimeni.md          はじめに
@@ -55,9 +55,9 @@ python3 $S/build_cover.py    book.json
 
 | ファイル | 案 |
 |---|---|
-| `cover/renrensen-sekkeizu-crackball.jpg` | 黒地に巨大なボール。オレンジのひびが一本 |
-| `cover/renrensen-sekkeizu-netshot.jpg` | ゴール裏から。ネット越しに突き刺さったボール |
-| `cover/renrensen-sekkeizu-splitweek.jpg` | 斜めに割った色面。上はふだんの週、下は大会の週 |
+| `cover/narabekata-row.jpg` | ボールが一列。試合の日だけオレンジの輪 |
+| `cover/narabekata-cones.jpg` | 芝に立つ7本のコーン。強度の日だけオレンジで高い |
+| `cover/narabekata-swap.jpg` | 上と下で同じ7個。2つ入れ替えただけで週が変わる |
 
 文言・色は `book.json` の `cover`、絵は `cover_art.py` で変えられます。
 

@@ -1,4 +1,4 @@
-# 証拠カード — 連戦で壊れない週の設計図
+# 証拠カード — サッカー練習の並べ方
 
 主典拠：Barça Innovation Hub「Training models in modern football: from traditional
 approaches to tactical periodisation」（2026年時点で公開中のブログ記事）
