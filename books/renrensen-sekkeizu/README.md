@@ -49,11 +49,13 @@ python3 $S/build_cover.py    book.json
 
 ## 表紙
 
+**色違いではなく、構図から違う3案**です。
+
 | ファイル | 案 |
 |---|---|
-| `cover/renrensen-sekkeizu-white.jpg` | 生成り地×黒＋オレンジ。既刊に最も近い |
-| `cover/renrensen-sekkeizu-navy.jpg` | 紺地×オレンジ |
-| `cover/renrensen-sekkeizu-diagram.jpg` | 四つの疲れと戻る速さの図解 |
+| `cover/renrensen-sekkeizu-pitch.jpg` | 芝の緑にゴール前の白線。下半分の濃緑面に文字 |
+| `cover/renrensen-sekkeizu-board.jpg` | 戦術ボード。四つの疲れと戻る速さをチップで図解 |
+| `cover/renrensen-sekkeizu-typo.jpg` | 図版なし。斜めの赤帯に煽り、極太タイトル |
 
 ## この本が原典に足したもの
 

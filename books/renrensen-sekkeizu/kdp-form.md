@@ -108,7 +108,7 @@ Amazon.co.jp
 | 項目 | 値 |
 |---|---|
 | 原稿 | `build/renrensen-sekkeizu.epub` |
-| 表紙 | `cover/renrensen-sekkeizu-white.jpg`（3案から選ぶ） |
+| 表紙 | `cover/renrensen-sekkeizu-pitch.jpg`（3案から選ぶ） |
 | ISBN | 不要 |
 | DRM | 任意。「はい」で問題ない |
 

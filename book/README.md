@@ -51,24 +51,21 @@ Python標準ライブラリのみ使用。pandoc等は不要です。
 ## 表紙
 
 `cover/` に3案あります（1600×2560px・JPEG、KDPにそのまま入稿可）。
-既刊シリーズの体裁——フラットな色面、極太ゴシックの2行タイトル、
-タイトル上に小さく発行元、下部に煽りコピー、右下にギザギザの
-シリーズバッジ「サッカー指導者にひらめきを」——に合わせています。
+**色違いではなく、構図から違う3案**です。
 
 | ファイル | 案 |
 |---|---|
-| `cover/cover-a-navy.jpg` | 紺地×オレンジ。整列したドットが崩れて落ちる |
-| `cover/cover-b-white.jpg` | 生成り地×黒＋オレンジ。既刊に最も近い |
-| `cover/cover-c-gates.jpg` | 生成り地×紺。七関門の図解（100→8） |
+| `cover/nanatsu-no-kanmon-pitch.jpg` | 芝の緑にゴール前の白線。下半分の濃緑面に文字 |
+| `cover/nanatsu-no-kanmon-board.jpg` | 戦術ボード。七つの関門を100人→8人のチップで図解 |
+| `cover/nanatsu-no-kanmon-typo.jpg` | 図版なし。斜めの帯に煽り、極太タイトル一本勝負 |
 
 ```bash
-cd cover && python3 build_covers.py   # out/ に再生成
+python3 ~/.claude/skills/kindle-publishing/scripts/build_cover.py book.json
 ```
 
-文言・色は `cover/build_covers.py` 冒頭の定数（TITLE_1 / TITLE_2 /
-SUBTITLE / PUBLISHER / HOOK / COPY_1 / COPY_2 / BADGE）で変更できます。
-和文フォント（Noto Sans JP のサブセット）は `cover/fonts/` に同梱、
-描画は同梱のChromium、書き出しはPillowで、外部サービスは不要です。
+文言・色は `book.json` の `cover` で変えられます（title_1 / title_2 / hook /
+copy / badge / diagram_labels / diagram_numbers / layouts）。3案とも下部に帯を
+敷き、発行元をタイトル上に小さく、右下にシリーズバッジを置いています。
 
 ## KDPへの入稿
 
@@ -79,7 +76,7 @@ SUBTITLE / PUBLISHER / HOOK / COPY_1 / COPY_2 / BADGE）で変更できます。
 1. KDPで「電子書籍」を新規作成
 2. `kdp-form.md` の値を上から順に転記（内容紹介は `kdp-listing.md` から）
 3. 原稿ファイルに `build/nanatsu-no-kanmon.epub` をアップロード
-4. 表紙 `cover/cover-*.jpg` をアップロード
+4. 表紙 `cover/nanatsu-no-kanmon-*.jpg` から1案をアップロード
 5. プレビューアで目次・表組み・奥付の表示を確認（表が多いので要チェック）
 6. 価格 ¥450／70%ロイヤリティ／KDPセレクトを設定
 

@@ -76,21 +76,16 @@
     "badge_color": "#C0392B",
     "accent": "#F08A24",
     "diagram_labels": [
-      "心 数週",
-      "筋 72h",
-      "神経 48h",
-      "頭 1日"
+      "筋の疲れ 48〜72時間",
+      "神経の疲れ 24〜48時間",
+      "頭の疲れ 半日〜1日",
+      "心の疲れ 数日〜数週"
     ],
-    "diagram_numbers": [
-      "おそい",
-      "はやい"
-    ],
+    "diagram_numbers": [],
     "layouts": [
-      "white",
-      "navy",
-      "diagram"
-    ],
-    "diagram_gap": 190,
-    "diagram_inset": 360
+      "pitch",
+      "board",
+      "typo"
+    ]
   }
 }
