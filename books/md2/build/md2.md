@@ -1,6 +1,6 @@
-# サッカー練習の並べ方
+# MD-2
 
-## 四つの疲れで組む一週間の設計
+## 試合から逆算するサッカーの一週間
 
 ---
 
@@ -1861,9 +1861,9 @@ Barça Innovation Hub「Training models in modern football: from traditional app
 
 # 奥付
 
-**サッカー練習の並べ方**
+**MD-2**
 
-四つの疲れで組む一週間の設計
+試合から逆算するサッカーの一週間
 
 著　フットボールパラダイム
 

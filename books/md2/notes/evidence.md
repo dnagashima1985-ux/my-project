@@ -1,4 +1,4 @@
-# 証拠カード — サッカー練習の並べ方
+# 証拠カード — MD-2（試合から逆算する一週間）
 
 主典拠：Barça Innovation Hub「Training models in modern football: from traditional
 approaches to tactical periodisation」（2026年時点で公開中のブログ記事）

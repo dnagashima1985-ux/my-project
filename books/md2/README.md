@@ -1,6 +1,6 @@
-# サッカー練習の並べ方 — 原稿一式
+# MD-2 — 原稿一式
 
-副題：四つの疲れで組む一週間の設計
+副題：試合から逆算するサッカーの一週間
 著／発行元：フットボールパラダイム
 
 日本の育成現場向けに書き下ろしたオリジナルの実務書です。骨格は独自の「四つの疲れ（筋・神経・頭・心）」と、
@@ -12,7 +12,7 @@ Barça Innovation Hub の記事「Training models in modern football」と、そ
 ## 構成
 
 ```
-books/narabekata/
+books/md2/
 ├── notes/evidence.md           証拠カード60枚（原稿の裏づけ）
 ├── src/                        章ごとのMarkdown（ここを編集する）
 │   ├── 00-hajimeni.md          はじめに
@@ -55,9 +55,9 @@ python3 $S/build_cover.py    book.json
 
 | ファイル | 案 |
 |---|---|
-| `cover/narabekata-row.jpg` | ボールが一列。試合の日だけオレンジの輪 |
-| `cover/narabekata-cones.jpg` | 芝に立つ7本のコーン。強度の日だけオレンジで高い |
-| `cover/narabekata-swap.jpg` | 上と下で同じ7個。2つ入れ替えただけで週が変わる |
+| `cover/md2-row.jpg` | ボールの一列。MD-2に輪、MDはオレンジ |
+| `cover/md2-cones.jpg` | 芝に立つコーン。MD-2だけ高くてオレンジ |
+| `cover/md2-swap.jpg` | 上と下で同じ7個。2つ入れ替えただけで週が変わる |
 
 文言・色は `book.json` の `cover`、絵は `cover_art.py` で変えられます。
 

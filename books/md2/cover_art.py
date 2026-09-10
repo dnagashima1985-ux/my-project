@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-"""『サッカー練習の並べ方』の表紙——タイトルから起こした3案。
+"""『MD-2』の表紙——タイトルから起こした3案。
 
-タイトルが「並べ方」なので、絵は全部「並んでいるもの」にした。
+タイトルが試合から逆算した日の呼び名なので、絵は「並び」と「逆算」で作る。
+表紙では MD-2 を巨大に組むので、絵の中でもその日に印をつけて意味を渡す。
 
-- row   : ボールが横一列。画面からはみ出すほど大きく。試合の日だけ色が違う
-- cones : 芝に立つ7本のコーン。強度の日だけオレンジ
+- row   : ボールが横一列。MD-2に輪、MDは色が違う
+- cones : 芝に立つコーン。MD-2だけ高くてオレンジ
 - swap  : 上と下で同じ7個。2つ入れ替えただけで週が変わる
 """
 
-DAYS = ["月", "火", "水", "木", "金", "土", "日"]
+DAYS = ["MD-5", "MD-4", "MD-3", "MD-2", "MD-1", "MD", "OFF"]
 SWAP_CAPTION = "入れ替えただけ。中身は同じ"
 CONE_CAPTION = "置く日を変えると、強くなる"
 
@@ -22,20 +23,21 @@ def row(cfg, P, S):
     ink, accent = P["ink"], P["accent"]
     # 左端の1個だけ断ち落として、週が続いていることを見せる。右端は輪ごと収める
     y, r, step = 520, 168, 366
-    labels = ["", "水", "木", "金", "土"]
+    labels = ["", "MD-3", "MD-2", "MD-1", "MD"]
     out = []
     for i in range(5):
         cx = -100 + i * step
-        if i == 4:                                   # 試合の日
+        if i == 2:                                   # 表紙の主役、MD-2
             out.append('<circle cx="%d" cy="%d" r="%d" fill="none" stroke="%s" '
-                       'stroke-width="16"/>' % (cx, y, r + 46, accent))
-        out.append(FB.ball(cx, y, r))
+                       'stroke-width="18"/>' % (cx, y, r + 46, accent))
+        out.append(FB.ball(cx, y, r,
+                           light=accent if i == 4 else "#FFFFFF"))
         if labels[i]:
-            out.append('<text x="%d" y="%d" fill="%s" font-size="62" '
+            out.append('<text x="%d" y="%d" fill="%s" font-size="54" '
                        'font-family="NSJP" font-weight="900" text-anchor="middle" '
                        'opacity="%s">%s</text>'
-                       % (cx, y + r + 140, accent if i == 4 else ink,
-                          "1" if i == 4 else ".8", labels[i]))
+                       % (cx, y + r + 140, accent if i == 2 else ink,
+                          "1" if i == 2 else ".8", labels[i]))
     out.append(FB.touchline(1010, color=ink, lw=8, W=W, corner=104))
     return "".join(out)
 
@@ -51,15 +53,15 @@ def cones(cfg, P, S):
     base, step = 200, 200
     for i in range(7):
         cx = base + i * step
-        hot = i in (1, 3)
-        out.append(FB.cone(cx, line_y, h=275 if hot else 200,
+        hot = i == 3            # MD-2
+        out.append(FB.cone(cx, line_y, h=290 if hot else 200,
                            color=accent if hot else "#F5F2EC",
                            dark=mix(P["bg"], "#000000", .35)))
         out.append('<text x="%d" y="%d" fill="%s" font-size="50" '
                    'font-family="NSJP" font-weight="900" text-anchor="middle" '
                    'opacity="%s">%s</text>'
                    % (cx, line_y + 90, accent if hot else ink,
-                      "1" if hot else ".8", DAYS[i]))
+                      "1" if hot else ".72", DAYS[i]))
     out.append('<text x="120" y="1104" fill="%s" font-size="48" '
                'font-family="NSJP" font-weight="900" opacity=".92">%s</text>'
                % (ink, CONE_CAPTION))
@@ -99,19 +101,19 @@ def swap(cfg, P, S):
 
 
 ARTS = [
-    {"name": "row", "text": "lower", "panel": 1180,
+    {"name": "row", "text": "hero", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
-     "glyphs": "".join(DAYS),
+     "glyphs": "".join(DAYS) + "MD-012345",
      "palette": ("#0E1116", "#0E1116", "#FFFFFF", "#F2A33A", "#F2A33A",
                  "#0E1116", "#C0392B", None),
      "svg": row},
-    {"name": "cones", "text": "lower", "panel": 1180,
+    {"name": "cones", "text": "hero", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
-     "glyphs": "".join(DAYS) + CONE_CAPTION,
+     "glyphs": "".join(DAYS) + CONE_CAPTION + "MD-012345",
      "palette": ("#12603E", "#0B3A26", "#FFFFFF", "#F08A24", "#FFFFFF",
                  "#0B3A26", "#C0392B", None),
      "svg": cones},
-    {"name": "swap", "text": "lower", "panel": 1180,
+    {"name": "swap", "text": "hero", "panel": 1180,
      "badge": (1300, 2072, 148), "obi_y": 2300,
      "glyphs": SWAP_CAPTION + "いつもの並び",
      "palette": ("#F1EDE4", "#16161A", "#FFFFFF", "#C0392B", "#C0392B",
