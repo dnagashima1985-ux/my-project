@@ -217,7 +217,7 @@ Barça Innovation Hub「Training models in modern football: from traditional app
 
 **一週間を逆算する**
 
-試合の5日前から当日まで、練習をどう並べるか
+試合の5日前から当日まで、練習をどうプランするか
 
 著　フットボールパラダイム
 
