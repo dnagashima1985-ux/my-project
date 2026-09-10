@@ -22,12 +22,12 @@ Isshukan wo Gyakusan suru
 ```
 **サブタイトル**
 ```
-MD-5からMDまで、サッカーの週を組む
+試合の5日前から当日まで、練習をどう並べるか
 ```
 **サブタイトルのフリガナ** / **ローマ字**
 ```
-エムディーゴカラエムディーマデ サッカーノシュウヲクム
-MD5 kara MD made Soccer no Shu wo Kumu
+シアイノイツカマエカラトウジツマデ レンシュウヲドウナラベルカ
+Shiai no Itsukamae kara Tojitsu made Renshu wo Do Naraberu ka
 ```
 
 ## レーベル ← 発行元はここ
@@ -85,7 +85,7 @@ Amazon.co.jp
 ```
 
 ## キーワード（最大7つ・各50文字以内）
-タイトル／サブタイトルに含まれる語（一週間・逆算・MD・サッカー・週）は入れていない。
+タイトル／サブタイトルに含まれる語（一週間・逆算・試合・練習・並べる）は入れていない。
 
 ```
 1. 戦術的ピリオダイゼーション 負荷管理
@@ -110,7 +110,7 @@ Amazon.co.jp
 | 項目 | 値 |
 |---|---|
 | 原稿 | `build/gyakusan.epub` |
-| 表紙 | `cover/gyakusan-*.jpg` の3案から1つ |
+| 表紙 | `cover/gyakusan-row.jpg`（採用案A・ボールの一列） |
 | ISBN | 不要 |
 | DRM | 任意。「はい」で問題ない |
 
