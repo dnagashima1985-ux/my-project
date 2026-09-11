@@ -211,6 +211,22 @@ TEXT = {
         "t2": (104, 1164, 226, 1.06, 900, "t2", "left"),
         "sub": (112, 1520, 52, 1.3, 700, "ink80", "left"),
     },
+    # a four-character title set as large as the page allows
+    "big": {
+        "byline": (110, 1250, 34, 1.2, 700, "ink70", "left"),
+        "t1": (108, 1316, 128, 1.15, 900, "ink", "left"),
+        "t2": (104, 1470, 330, 1.02, 900, "t2", "left"),
+        "sub": (112, 1888, 50, 1.3, 700, "ink80", "left"),
+        "hook": (104, 2000, 88, 1.2, 900, "accent", "left"),
+    },
+    # a short title set enormous — for one-word or code-like titles
+    "hero": {
+        "byline": (110, 1236, 34, 1.2, 700, "ink70", "left"),
+        "t1": (110, 1292, 62, 1.2, 700, "ink80", "left"),
+        "t2": (104, 1352, 400, 1.0, 900, "t2", "left"),
+        "sub": (112, 1810, 54, 1.3, 700, "ink80", "left"),
+        "hook": (104, 1922, 92, 1.2, 900, "accent", "left"),
+    },
     # everything centred, for the rule box and the giant numeral
     "centre": {
         "byline": (800, 300, 34, 1.2, 700, "ink70", "centre"),

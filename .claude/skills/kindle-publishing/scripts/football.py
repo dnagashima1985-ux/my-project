@@ -13,8 +13,9 @@ import math
 
 def ball(cx, cy, r, light="#FFFFFF", dark="#16161A", lw=None):
     """サッカーボール。小さいときは記号として、大きいときは球として描く。"""
-    # 小さいうちは記号のほうが読める。細かく描くと車輪に見える境目がここ
-    if r >= 110:
+    # 記号で足りるのは、ごく小さいときだけ。それ以上は面を描いたほうが球に見える
+    # （110pxで並べて確認した。縮小プレビューではなく原寸で見ること）
+    if r >= 70:
         return ball_detail(cx, cy, r, light=light, dark=dark)
     lw = lw if lw is not None else max(2.0, r * 0.09)
     out = ['<circle cx="%.1f" cy="%.1f" r="%.1f" fill="%s" stroke="%s" '
@@ -265,3 +266,32 @@ def split_diagonal(W, H, top_color, bottom_color, y_left, y_right):
             '<polygon points="0,%d %d,%d %d,%d 0,%d" fill="%s"/>'
             % (W, W, y_right, y_left, top_color,
                y_left, W, y_right, W, H, H, bottom_color))
+
+
+def cone(cx, base_y, h=150, color="#F08A24", dark=None, lw=0):
+    """マーカーコーン。練習そのものの記号。"""
+    w = h * 0.62
+    out = ['<ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="%s"/>'
+           % (cx, base_y, w * 0.78, w * 0.22, dark or color)]
+    out.append('<polygon points="%.1f,%.1f %.1f,%.1f %.1f,%.1f" fill="%s"/>'
+               % (cx, base_y - h, cx + w / 2, base_y, cx - w / 2, base_y, color))
+    out.append('<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" '
+               'fill="#FFFFFF" opacity=".85"/>'
+               % (cx - w * 0.30, base_y - h * 0.52, w * 0.60, h * 0.13))
+    return "".join(out)
+
+
+def arrow_curve(x1, y1, x2, y2, color="#16161A", lw=8, bow=0.45, head=26):
+    """入れ替えや流れを示す曲がった矢印。"""
+    import math as _m
+    mx, my = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+    dx, dy = x2 - x1, y2 - y1
+    cx, cy = mx - dy * bow, my + dx * bow
+    ang = _m.atan2(y2 - cy, x2 - cx)
+    p1 = (x2 - head * _m.cos(ang - 0.42), y2 - head * _m.sin(ang - 0.42))
+    p2 = (x2 - head * _m.cos(ang + 0.42), y2 - head * _m.sin(ang + 0.42))
+    return ('<path d="M%.1f %.1f Q%.1f %.1f %.1f %.1f" fill="none" stroke="%s" '
+            'stroke-width="%.1f" stroke-linecap="round"/>'
+            '<polygon points="%.1f,%.1f %.1f,%.1f %.1f,%.1f" fill="%s"/>'
+            % (x1, y1, cx, cy, x2, y2, color, lw,
+               x2, y2, p1[0], p1[1], p2[0], p2[1], color))
